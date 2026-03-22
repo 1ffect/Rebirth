@@ -379,6 +379,7 @@ body{font-family:'Noto Sans SC',-apple-system,'PingFang SC',sans-serif;color:#e0
     </div>
   </div>
   <button id="intro-start-btn" onclick="G.startGame()">接受指引，激活搞钱/商城 App</button>
+  <button id="intro-resume-btn" onclick="G.resumeFromSave()" style="margin-top:10px;padding:12px 30px;background:#000;border:1px solid #32d74b;color:#32d74b;font-family:'JetBrains Mono',inherit;font-weight:700;font-size:13px;border-radius:0;cursor:pointer;letter-spacing:2px;display:none">继续上次游戏</button>
 </div>
 <div class="glitch-overlay" id="glitchOverlay"></div>
 
@@ -455,12 +456,22 @@ const META = {
   save() {
     try { localStorage.setItem(this.KEY, JSON.stringify(this.data)); } catch(e) {}
   },
-  fresh() { return { points:0, unlocked:[], runCount:0, bestScore:0 }; },
+  fresh() { return { points:0, unlocked:[], runCount:0, bestScore:0, repeatLevels:{} }; },
   has(id) { return this.data && this.data.unlocked.includes(id); },
   buy(id, cost) {
     if (!this.data || this.data.points < cost || this.has(id)) return false;
     this.data.points -= cost;
     this.data.unlocked.push(id);
+    this.save();
+    return true;
+  },
+  getRepeatLv(id) { return (this.data && this.data.repeatLevels && this.data.repeatLevels[id]) || 0; },
+  buyRepeat(id, cost) {
+    if (!this.data) return false;
+    if (!this.data.repeatLevels) this.data.repeatLevels = {};
+    if (this.data.points < cost) return false;
+    this.data.points -= cost;
+    this.data.repeatLevels[id] = (this.data.repeatLevels[id] || 0) + 1;
     this.save();
     return true;
   },
@@ -611,12 +622,13 @@ const WH = {
 
   drawParticles(ctx) {
     this.particles.forEach(p => {
-      const alpha = 1 - p.life / p.maxLife;
-      ctx.fillStyle = p.color.replace(')', `,${alpha})`).replace('rgb','rgba');
+      ctx.globalAlpha = 1 - p.life / p.maxLife;
+      ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size * (1 - p.life/p.maxLife), 0, Math.PI*2);
       ctx.fill();
     });
+    ctx.globalAlpha = 1;
   },
 
   // ===== MAIN RENDER LOOP =====
@@ -836,7 +848,7 @@ const G = {
     { id:'neighbor_wholesale', name:'🏪 邻居清仓甩卖', trigger:()=>G.s.day<=-12&&!G.s.flags.neighbor_wholesale,
       desc:'楼下超市老板娘跑路前把钥匙扔给你了："随便拿，带不走的。反正明天这栋楼就没人了。"',
       choices:[
-        { txt:'搬空整个超市 (松弛+150，但要有空间)', reward:()=>{const bonus=Math.min(G.s.capacity-G.s.used,50);G.s.used+=bonus;G.s.stock.rice=(G.s.stock.rice||0)+Math.floor(bonus/15);G.s.euphoria+=150;G.notif('🏪 超市物资入库！','success')}},
+        { txt:'搬空整个超市 (松弛+150，但要有空间)', reward:()=>{const bonus=Math.min(G.s.capacity-G.s.used,50);G.s.used+=bonus;const riceQty=Math.floor(bonus/15);G.s.stock.rice=(G.s.stock.rice||0)+riceQty;G.s.euphoria+=150;const riceItem=G.ITEMS.find(x=>x.id==='rice');if(riceItem&&riceQty>0)WH.addItem(riceItem,riceQty);G.notif('🏪 超市物资入库！','success')}},
         { txt:'只拿点零食就走', reward:()=>{G.s.stock.choco=(G.s.stock.choco||0)+3;G.s.used+=3;G.s.euphoria+=30}}
       ]},
     { id:'crypto_tip', name:'📈 币圈大佬的临终遗言', trigger:()=>G.s.day<=-8&&!G.s.flags.crypto_tip&&G.s.cash>=500000,
@@ -850,7 +862,7 @@ const G = {
   // ===== PHASE 2 DATA =====
   COMPANIONS: [
     // ===== SSR: 三位核心女性同伴 =====
-    { id:'hunter', name:'楚狄', code:null, title:'黑市第一杀手', icon:'🗡️', rarity:'SSR',
+    { id:'hunter', name:'楚狄', code:'月狩', title:'黑市第一杀手', icon:'🗡️', rarity:'SSR',
       passive:{ defense:25, foodSave:0, exposureDecay:2, euphPerDay:0, defBonus:0,
                dailyScavenge:true, rightSwipeBonus:2 },
       desc:'黑色作战服、短发、伤疤从左眉划到下巴。通缉令上的赏金够买三套别墅。身中数枪倒在你门外，手里还攥着一把开了刃的军刀。',
@@ -870,7 +882,7 @@ const G = {
         3: ['外面的世界脏透了，但我会保住你这方干净的乌托邦。','（暴徒攻城时，她单枪匹马杀出去，回来时浑身是血）——没受伤。别哭。','如果末日结束……我可以继续当你的保镖吗？免费的那种。']
       }
     },
-    { id:'owl', name:'宁鸮', code:null, title:'财阀千金·天才黑客', icon:'💎', rarity:'SSR',
+    { id:'owl', name:'宁鸮', code:'夜鸮', title:'财阀千金·天才黑客', icon:'💎', rarity:'SSR',
       passive:{ defense:8, foodSave:0, exposureDecay:0, euphPerDay:0, defBonus:0,
                exposureSlowdown:0.3, autoBlockRaid:false },
       desc:'你以前高攀不起的顶级富家女。精通代码，掌控着半个城市的卫星网络。末日爆发时她的私人直升机被击落，唯一幸存，带着一箱子芯片倒在你门外。',
@@ -890,7 +902,7 @@ const G = {
         3: ['以前我觉得钱能买到一切。现在发现，买不到你这种人。','我家的卫星、无人机、武器库——全是你的了。反正我只需要你和Wi-Fi。','（她第一次对你笑了）末日最好的投资，就是救了你。']
       }
     },
-    { id:'seed', name:'黎冥', code:null, title:'病娇天才女医生', icon:'💉', rarity:'SSR',
+    { id:'seed', name:'黎冥', code:'冥种', title:'病娇天才女医生', icon:'💉', rarity:'SSR',
       passive:{ defense:0, foodSave:0.2, waterSave:0.2, exposureDecay:0, euphPerDay:10, defBonus:0,
                greenhouse:true, darkNutrient:true },
       desc:'温声细语的顶尖医学博士，穿着染血的白大褂倒在门外。看起来柔弱无害，但她的急救箱里有你见过最齐全的药品——包括几支来路不明的试剂。',
@@ -1222,14 +1234,6 @@ const G = {
       right:{ label:'不值得暴露位置', euph:10, exposure:0,
         text:'"行吧。保守派的选择。"她关掉了卫星地图。"但那箱物资可够吃半个月的。"\n\n你知道她说得对。但暴露度+15在末日意味着什么，你更清楚。' } },
 
-    { id:'seed_jealousy', day:[35,50], type:'companion_exclusive', once:true, requiresCompanion:'seed',
-      title:'女医生的领地', avatar:'💉',
-      desc:'一个受伤的年轻女人敲门求救。你正要打开门——\n\n黎冥拦住了你，微笑着摇头："我检测到她携带不明病原体。不能让她进来。"\n\n你看了看监控。那个女人只是手臂擦伤，精神状态完全正常。\n\n黎冥注意到你的犹豫。她的笑容没变，但声音轻了一度："你不信我？"\n\n沉默。\n\n"……我只是不想让任何人伤害你。这里的药不够分给外人。你明白的，对吧？"',
-      left:{ label:'"我信你。不开门。"', cost:{},
-        text:'黎冥的眼睛亮了。她从背后抱住你："我就知道你最懂我。"\n\n那个女人最终离开了。你不确定自己做了对的选择。但黎冥今晚做的晚餐，是你吃过最好吃的一顿。', euphPerDay:5 },
-      right:{ label:'"让我自己判断。开门检查。"', euph:0, exposure:3,
-        text:'你开了门。那个女人确实没有病。你给了她一些物资，她感激地离开了。\n\n黎冥全程站在角落，微笑着，一言不发。但接下来三天她做的饭都没什么味道。\n\n第四天一切恢复正常。她端着一碗热汤走过来："我想通了。你心善是好事。但下次——让我先检查，好吗？"' } },
-
     { id:'triple_bond', day:[38,58], type:'companion_exclusive', once:true,
       title:'圆桌会议', avatar:'💫',
       desc:()=>{
@@ -1371,7 +1375,8 @@ const G = {
       defense:0, euphProd:0, euphCurrency:0,
       pendingEvent:null, usedEvents:[], eventCooldowns:{},
       bonusEuphPerDay:0, p2app:'swipe', starveDays:0,
-      tacticalWarning:false, defDebuffDays:0, companionDebuffs:{}, p2Flags:[]
+      tacticalWarning:false, defDebuffDays:0, companionDebuffs:{}, p2Flags:[],
+      noEventDays:0
     };
   },
 
@@ -1399,6 +1404,11 @@ const G = {
     document.getElementById('newsCard').style.display = '';
     document.getElementById('systemCard').classList.remove('show');
     document.getElementById('intro-start-btn').classList.remove('show');
+    document.getElementById('intro-resume-btn').style.display = 'none';
+    // Show resume button if save exists
+    if (this.hasSave()) {
+      document.getElementById('intro-resume-btn').style.display = 'block';
+    }
     setTimeout(() => { document.getElementById('newsCard').classList.add('show'); this.typeNews(); }, 600);
   },
 
@@ -1465,7 +1475,18 @@ const G = {
     this.s.tutorialStep = 3;
     document.querySelectorAll('.tutorial-highlight').forEach(e => e.classList.remove('tutorial-highlight'));
     this.removeTip();
-    setTimeout(() => this.notif('💡 空间满了？去基建App升级！', 'money'), 300);
+    setTimeout(() => {
+      const btn = document.querySelector('.app-btn[data-app="base"]');
+      if (btn) btn.classList.add('tutorial-highlight');
+      this.showTip('空间满了！去基建App升级避难所 🏗️');
+    }, 400);
+  },
+  tutorialStep4() {
+    if (this.s.tutorialStep !== 3) return;
+    this.s.tutorialStep = 4;
+    document.querySelectorAll('.tutorial-highlight').forEach(e => e.classList.remove('tutorial-highlight'));
+    this.removeTip();
+    setTimeout(() => this.notif('💡 循环：搞钱→升级→扫货→再搞钱！', 'money'), 300);
   },
   showTip(t) { this.removeTip(); const e=document.createElement('div'); e.className='tutorial-tip'; e.id='tutTip'; e.textContent=t; document.body.appendChild(e); },
   removeTip() { const e=document.getElementById('tutTip'); if(e)e.remove(); },
@@ -1501,12 +1522,18 @@ const G = {
       this.s.panic = Math.min(100, this.s.panic + 3 + Math.floor(Math.random() * 5));
       this.checkMortgageUnlock();
       if (this.s.day >= 0) { this.pauseGame(); this.showPhase2Transition(); return; }
-      this.checkIntel();
-      this.triggerRandomEvent();
+      // Phase 1: timer never pauses for popups — skip if modal already open
+      const modalOpen = document.getElementById('modalOverlay').classList.contains('show');
+      if (!modalOpen) {
+        this.checkIntel();
+        this.triggerRandomEvent();
+      }
       this.render();
+      this.saveGame();
     } else {
       this.s.p2day++;
       this.p2ProcessDay();
+      if (!this.s.done) this.saveGame();
     }
   },
 
@@ -1515,9 +1542,8 @@ const G = {
     if (s.day >= -15 && !s.flags.mortgageUnlock && s.finCount.loan >= 2) {
       s.flags.mortgageUnlock = true;
       this.log('🔓 抵押通道已打开！');
-      // 先渲染让按钮亮起来，再弹窗
+      // 先渲染让按钮亮起来，再弹窗（Phase 1不暂停倒计时）
       this.render();
-      this.pauseGame();
       SFX.play('alert');
       document.getElementById('modal').innerHTML = `
         <h2>🔓 新通道解锁</h2>
@@ -1526,9 +1552,21 @@ const G = {
           <div style="color:#aaa;font-size:13px;line-height:1.6">房产、车子、期权——一键变现 5000万~1.5亿。<br>末日后钱就是废纸，全梭哈！</div>
         </div>
         <div class="modal-options">
-          <button class="option-btn" onclick="G.closeModal();G.switchApp('finance')" style="text-align:center;font-weight:700;color:#CCFF00">去搞钱页面查看 →</button>
+          <button class="option-btn" onclick="G.closeModal();G.switchApp('finance')" style="text-align:center;font-weight:700;color:#CCFF00">去搞钱页面查看 → <span id="unlockCountdown" style="color:#555">(4s)</span></button>
         </div>`;
       document.getElementById('modalOverlay').classList.add('show');
+      // Auto-close countdown
+      let sec = 4;
+      if (this._unlockTimer) clearInterval(this._unlockTimer);
+      this._unlockTimer = setInterval(() => {
+        sec--;
+        const cd = document.getElementById('unlockCountdown');
+        if (cd) cd.textContent = `(${sec}s)`;
+        if (sec <= 0) {
+          clearInterval(this._unlockTimer); this._unlockTimer = null;
+          if (document.getElementById('modalOverlay').classList.contains('show')) { this.closeModal(); this.switchApp('finance'); }
+        }
+      }, 1000);
     }
   },
 
@@ -1552,7 +1590,7 @@ const G = {
   },
 
   showIntelPopup(item) {
-    this.pauseGame();
+    // Phase 1: info-only popups don't pause timer, auto-close after 3s
     SFX.play('alert');
     const typeLabel = {breaking:'🔴 突发',tip:'🟢 情报',default:'🔵 消息'}[item.type] || '📡 情报';
     document.getElementById('modal').innerHTML = `
@@ -1563,9 +1601,21 @@ const G = {
         <div style="color:#aaa;font-size:12px">${item.detail}</div>
       </div>
       <div class="modal-options">
-        <button class="option-btn" onclick="G.closeModal()" style="text-align:center;font-weight:700">收到</button>
+        <button class="option-btn" onclick="G.closeModal()" style="text-align:center;font-weight:700">收到 <span id="intelCountdown" style="color:#555">(3s)</span></button>
       </div>`;
     document.getElementById('modalOverlay').classList.add('show');
+    // Auto-close countdown
+    let sec = 3;
+    if (this._intelTimer) clearInterval(this._intelTimer);
+    this._intelTimer = setInterval(() => {
+      sec--;
+      const cd = document.getElementById('intelCountdown');
+      if (cd) cd.textContent = `(${sec}s)`;
+      if (sec <= 0) {
+        clearInterval(this._intelTimer); this._intelTimer = null;
+        if (document.getElementById('modalOverlay').classList.contains('show')) this.closeModal();
+      }
+    }, 1000);
   },
 
   // ===== RENDER =====
@@ -1770,6 +1820,7 @@ const G = {
     SFX.play('upgrade');
     this.log(`🏗️ 升级至【${tier.name}】总容量${tier.cap.toLocaleString()}m³！`);
     this.notif(`🏗️ ${tier.name} 解锁！容量${this.s.capacity}m³`, 'success');
+    if (this.s.tutorialStep === 3) this.tutorialStep4();
     this.render();
   },
 
@@ -1777,6 +1828,7 @@ const G = {
   switchApp(id) {
     this.s.app = id;
     if (id === 'shop' && this.s.tutorialStep === 1 && this.s.cash > 0) this.tutorialStep2();
+    if (id === 'base' && this.s.tutorialStep === 3) { document.querySelectorAll('.tutorial-highlight').forEach(e => e.classList.remove('tutorial-highlight')); this.removeTip(); }
     this.updateAppBar();
     this.updateModulePanel();
   },
@@ -1790,7 +1842,7 @@ const G = {
     if (s.cash < cost) { SFX.play('error'); this.notif('❌ 现金不足！去搞钱','danger'); return; }
     if (s.used + item.vol > s.capacity) {
       SFX.play('error'); this.notif('❌ 空间满了！去基建App升级','danger');
-      if (this.s.tutorialStep === 2) this.tutorialStep3();
+      if (this.s.tutorialStep <= 3) this.tutorialStep3();
       return;
     }
     s.cash -= cost;
@@ -1823,10 +1875,14 @@ const G = {
   },
   closeModal() {
     document.getElementById('modalOverlay').classList.remove('show');
+    // Clear any auto-close timers
+    if (this._intelTimer) { clearInterval(this._intelTimer); this._intelTimer = null; }
+    if (this._unlockTimer) { clearInterval(this._unlockTimer); this._unlockTimer = null; }
     this.resumeGame();
   },
 
   showEventModal(ev) {
+    // Phase 1 events with choices: pause so player can decide
     this.pauseGame();
     SFX.play('alert');
     document.getElementById('modal').innerHTML = `<h2>${ev.name}</h2>
@@ -1844,8 +1900,10 @@ const G = {
   // Exponential inflation: starts at x1, hits ~x4 by day -5
   priceMul() {
     const elapsed = 30 - Math.abs(this.s.day);
-    const base = 1 + 0.04 * elapsed + 0.02 * this.s.panic;
-    return META.has('vipcard') ? base * 0.8 : base;
+    let base = 1 + 0.04 * elapsed + 0.02 * this.s.panic;
+    if (META.has('vipcard')) base *= 0.8;
+    if (this.s.flags.blackMarketDiscount) base *= 0.7;
+    return base;
   },
 
   log(t) {
@@ -1865,6 +1923,7 @@ const G = {
 
   endGame() {
     WH.stopLoop();
+    this.clearSave();
     const s = this.s;
     if (s.phase === 1) { this.showPhase2Transition(); return; }
 
@@ -1966,14 +2025,23 @@ const G = {
     // Convert stock to resource pools (balanced for 60-day survival)
     s.foodPool = (s.stock.rice||0)*8 + (s.stock.hotpot||0)*4 + (s.stock.choco||0)*2 +
                  (s.stock.coffee||0)*2 + (s.stock.meat||0)*6;
-    s.waterPool = (s.stock.water||0)*8;
+    s.waterPool = (s.stock.water||0)*10 + (s.stock.bathtub||0)*3 + (s.stock.coffee||0)*1;
     s.medPool = (s.stock.med||0)*4;
     if (META.has('medreserve')) s.medPool += 10;
+    // Apply repeatable meta bonuses
+    const repFood = META.getRepeatLv('rep_food');
+    const repWater = META.getRepeatLv('rep_water');
+    const repDef = META.getRepeatLv('rep_def');
+    const repEuph = META.getRepeatLv('rep_euph');
+    if (repFood > 0) s.foodPool += repFood * 8;
+    if (repWater > 0) s.waterPool += repWater * 6;
+
     s.hasPower = (s.stock.generator||0) > 0;
     s.hasGreenhouse = (s.stock.greenhouse||0) > 0;
 
     // Defense from Phase 1
     s.defense = s.baseLv * 15 + (s.stock.door||0) * 25 + (s.stock.generator||0) * 10;
+    if (repDef > 0) s.defense += repDef * 12;
 
     // Daily euphoria production from luxury items
     s.euphProd = 0;
@@ -1982,6 +2050,7 @@ const G = {
                     (s.stock.bathtub||0)*5 + (s.stock.massage||0)*4;
     }
     s.euphProd += (s.stock.skincare||0)*3 + (s.stock.wine||0)*4 + (s.stock.pet||0)*3;
+    if (repEuph > 0) s.euphProd += repEuph * 3;
 
     // Carry over euphoria
     s.euphCurrency = Math.floor(s.euphoria / 2);
@@ -2022,7 +2091,7 @@ const G = {
     const waterNeed = Math.max(1, Math.round(people * 1.0 * (1 - Math.min(0.4, waterSave))));
 
     // Greenhouse: works with power (produces food + water recycling)
-    if (s.hasGreenhouse && s.hasPower) { s.foodPool += 2; s.waterPool += 1; }
+    if (s.hasGreenhouse && s.hasPower) { s.foodPool += 2; s.waterPool += 2; }
 
     // Generator fuel cost: every other day
     if (s.hasPower && s.p2day % 2 === 0 && !s.flags.nuclearBattery) s.foodPool = Math.max(0, s.foodPool - 1);
@@ -2065,10 +2134,10 @@ const G = {
 
     // 3. Exposure: natural daily drift + decay
     // Exposure naturally grows as time passes (more people know you're there)
-    const naturalGrowth = Math.min(3, 1 + Math.floor(s.p2day / 20));
+    const naturalGrowth = Math.min(2, Math.floor(s.p2day / 20));
     s.exposure = Math.min(100, s.exposure + naturalGrowth);
 
-    let decay = 1;
+    let decay = 2;
     s.companions.forEach(cid => {
       const c = this.COMPANIONS.find(x => x.id === cid);
       if (c && c.passive.exposureDecay && !s.companionDebuffs[cid]) decay += c.passive.exposureDecay;
@@ -2153,29 +2222,37 @@ const G = {
       this.p2TriggerRaid('minor'); return;
     }
 
-    // 6. Event check
-    const evt = this.p2SelectEvent();
+    // 6. Event check (guarantee: force event if 2+ days without one)
+    let evt = this.p2SelectEvent();
+    if (!evt && s.noEventDays >= 2) {
+      // Force-select with relaxed day range
+      evt = this.p2SelectEvent(true);
+    }
     if (evt) {
       s.pendingEvent = evt;
       if (evt.once) s.usedEvents.push(evt.id);
       if (evt.cooldown) s.eventCooldowns[evt.id] = s.p2day;
+      s.noEventDays = 0;
       this.pauseGame();
       SFX.play('alert');
+    } else {
+      s.noEventDays++;
     }
 
-    // 7. Multi-ending checks
+    // 7. Multi-ending checks (offer as choice, not forced)
     // 🚁 直升机救援：day >= 45 + defense >= 80 + meta unlocked
-    if (META.has('helicopter') && s.p2day >= 45 && s.defense >= 80 && !s.flags.heliTriggered) {
-      s.flags.heliTriggered = true;
-      s.done = true; this.pauseGame();
+    if (META.has('helicopter') && s.p2day >= 45 && s.defense >= 80 && !s.flags.heliOffered) {
+      s.flags.heliOffered = true;
+      this.pauseGame();
       this.showSpecialEnding('helicopter'); return;
     }
-    // 🏚️ 地下城入口：day >= 50 + 3 SSR companions + meta unlocked
-    if (META.has('dungeon') && s.p2day >= 50 && !s.flags.dungeonTriggered) {
+    // 🏚️ 地下城入口：day >= 50 + 2+ SSR companions + meta unlocked
+    if (META.has('dungeon') && s.p2day >= 50 && !s.flags.dungeonOffered) {
       const ssrIds = this.COMPANIONS.filter(c=>c.rarity==='SSR').map(c=>c.id);
-      if (ssrIds.every(id => s.companions.includes(id))) {
-        s.flags.dungeonTriggered = true;
-        s.done = true; this.pauseGame();
+      const ssrCount = ssrIds.filter(id => s.companions.includes(id)).length;
+      if (ssrCount >= 2) {
+        s.flags.dungeonOffered = true;
+        this.pauseGame();
         this.showSpecialEnding('dungeon'); return;
       }
     }
@@ -2188,7 +2265,7 @@ const G = {
   },
 
   // ===== DYNAMIC WEIGHT EVENT ENGINE =====
-  p2SelectEvent() {
+  p2SelectEvent(forceRelax) {
     const s = this.s;
 
     // Step 1: Filter — pool access, conditions, uniqueness, cooldowns
@@ -2197,8 +2274,9 @@ const G = {
       const pool = e.pool_id || 'base';
       if (pool !== 'base' && !META.has(pool)) return false;
 
-      // Day range
-      if (s.p2day < e.day[0] || s.p2day > e.day[1]) return false;
+      // Day range (relaxed: ignore upper bound when forcing)
+      if (s.p2day < e.day[0]) return false;
+      if (!forceRelax && s.p2day > e.day[1]) return false;
 
       // Uniqueness & cooldown
       if (e.once && s.usedEvents.includes(e.id)) return false;
@@ -2377,8 +2455,8 @@ const G = {
       // Right swipe
       SFX.play('cash');
       const r = evt.right;
-      const hunterBonus = s.companions.includes('hunter') ? 2 : 1;
-      if (r.euph) s.euphCurrency += r.euph * hunterBonus;
+      const hunterBonus = s.companions.includes('hunter') ? 2 : 1.5;
+      if (r.euph) s.euphCurrency += Math.round(r.euph * hunterBonus);
       const owlSlow2 = s.companions.includes('owl') ? 0.7 : 1;
       const tacWarn = s.tacticalWarning ? 0.5 : 1;
       s.exposure = Math.min(100, s.exposure + Math.round((r.exposure||0)*owlSlow2*tacWarn));
@@ -2537,14 +2615,14 @@ const G = {
   p2BuyMarket(type) {
     const s = this.s;
     const items = {
-      supply: { cost:60, fn:()=>{
+      supply: { cost:40, fn:()=>{
         const r=Math.random();
         if(r<0.4){s.foodPool+=5;s.waterPool+=4;this.notif('📦 食物+5 水+4','success');}
         else if(r<0.7){s.medPool+=2;this.notif('📦 医疗+2','success');}
         else{s.foodPool+=3;s.waterPool+=3;s.medPool+=1;this.notif('📦 混合补给','success');}
       }},
-      defense: { cost:100, fn:()=>{s.defense+=8;this.notif('🛡️ 防御+8','success');} },
-      medkit: { cost:40, fn:()=>{s.medPool+=3;s.hp=Math.min(100,s.hp+8);this.notif('💊 医疗+3 HP+8','success');} }
+      defense: { cost:70, fn:()=>{s.defense+=8;this.notif('🛡️ 防御+8','success');} },
+      medkit: { cost:25, fn:()=>{s.medPool+=3;s.hp=Math.min(100,s.hp+8);this.notif('💊 医疗+3 HP+8','success');} }
     };
     const it = items[type];
     if (!it || s.euphCurrency < it.cost) { SFX.play('error'); this.notif('爽度不足！','danger'); return; }
@@ -2745,9 +2823,9 @@ const G = {
   p2RenderMarket(panel) {
     const s = this.s;
     const items = [
-      {id:'supply',name:'🎲 盲盒补给',desc:'随机获得食物/水/医疗',cost:60},
-      {id:'defense',name:'🛡️ 加固防御',desc:'防御力 +8',cost:100},
-      {id:'medkit',name:'💊 急救药包',desc:'医疗 +3，HP +8',cost:40}
+      {id:'supply',name:'🎲 盲盒补给',desc:'随机获得食物/水/医疗',cost:40},
+      {id:'defense',name:'🛡️ 加固防御',desc:'防御力 +8',cost:70},
+      {id:'medkit',name:'💊 急救药包',desc:'医疗 +3，HP +8',cost:25}
     ];
     let html = `<div class="m-header"><span>🏪 黑市</span><span style="color:#bf5af2;font-size:10px">爽度: ${s.euphCurrency}</span></div>`;
     items.forEach(it => {
@@ -2773,7 +2851,15 @@ const G = {
     { id:'crypto',     name:'加密货币终端',   icon:'₿',  cost:600,  desc:'解锁搞钱新按钮：投入全部现金，50%翻倍 / 50%清零！' },
     { id:'nuclear',    name:'微型核聚变电池', icon:'☢️', cost:800,  desc:'发电机不再消耗食物作为燃料' },
     { id:'helicopter', name:'直升机救援线索', icon:'🚁', cost:1500, desc:'解锁隐藏结局：存活45天+防御≥80→直升机来接你！' },
-    { id:'dungeon',    name:'地下城蓝图碎片', icon:'🏚️', cost:1200, desc:'解锁隐藏结局：存活50天+3位SSR同伴→发现地下城入口！' },
+    { id:'dungeon',    name:'地下城蓝图碎片', icon:'🏚️', cost:1200, desc:'解锁隐藏结局：存活50天+2位SSR同伴→发现地下城入口！' },
+  ],
+
+  // Repeatable meta upgrades (infinite scaling)
+  META_REPEATS: [
+    { id:'rep_food',  name:'额外食物储备',  icon:'🍚', baseCost:200, costScale:100, desc:'末日降临时额外+8食物', perLv:'食物+8' },
+    { id:'rep_water', name:'额外净水储备',  icon:'💧', baseCost:200, costScale:100, desc:'末日降临时额外+6水', perLv:'水+6' },
+    { id:'rep_def',   name:'强化防御装甲',  icon:'🛡️', baseCost:300, costScale:150, desc:'末日降临时额外+12防御', perLv:'防御+12' },
+    { id:'rep_euph',  name:'爽度加速器',    icon:'⚡', baseCost:250, costScale:125, desc:'末日后每日额外+3爽度', perLv:'+3/天' },
   ],
 
   enterDarkMarket() {
@@ -2842,6 +2928,19 @@ const G = {
           <div class="dm-cost">${owned ? '✓ 已解锁' : item.cost + ' 爽度'}</div>
         </div>`;
       });
+      // Repeatable upgrades
+      html += '</div><div style="color:#00ff88;font-size:10px;font-weight:700;margin:12px 0 6px;font-family:\'JetBrains Mono\',monospace;letter-spacing:2px;text-transform:uppercase">♾️ 可重复升级</div><div class="dm-grid">';
+      this.META_REPEATS.forEach(item => {
+        const lv = META.getRepeatLv(item.id);
+        const cost = item.baseCost + lv * item.costScale;
+        const canAfford = m.points >= cost;
+        html += `<div class="dm-item ${!canAfford?'cant-afford':''}" onclick="G.buyRepeatItem('${item.id}')">
+          <div class="dm-icon">${item.icon}</div>
+          <div class="dm-name">${item.name} ${lv > 0 ? '<span style="color:#00ff88;font-size:10px">Lv'+lv+'</span>' : ''}</div>
+          <div class="dm-desc">${item.desc} <span style="color:#00ff88">(${item.perLv})</span></div>
+          <div class="dm-cost">${cost} 爽度</div>
+        </div>`;
+      });
       html += '</div>';
     }
 
@@ -2859,6 +2958,19 @@ const G = {
     if (META.buy(id, item.cost)) {
       SFX.play('upgrade');
       this.notif(`✓ ${item.name} 已解锁！`,'success');
+      this.renderDarkMarket();
+    }
+  },
+
+  buyRepeatItem(id) {
+    const item = this.META_REPEATS.find(x => x.id === id);
+    if (!item) return;
+    const lv = META.getRepeatLv(id);
+    const cost = item.baseCost + lv * item.costScale;
+    if (META.data.points < cost) { SFX.play('error'); this.notif('爽度不足！','danger'); return; }
+    if (META.buyRepeat(id, cost)) {
+      SFX.play('upgrade');
+      this.notif(`✓ ${item.name} Lv${lv+1}！`,'success');
       this.renderDarkMarket();
     }
   },
@@ -2904,6 +3016,12 @@ const G = {
     if (META.has('crypto')) this.log('₿ 加密货币终端已激活。');
     if (META.has('nuclear')) this.log('☢️ 核聚变电池已装载。');
     if (META.has('medreserve')) this.log('💉 应急医疗储备已就位。');
+    // Log repeatable bonuses
+    const rf = META.getRepeatLv('rep_food'), rw = META.getRepeatLv('rep_water'), rd = META.getRepeatLv('rep_def'), re = META.getRepeatLv('rep_euph');
+    if (rf>0) this.log(`🍚 食物储备 Lv${rf}：末日+${rf*8}食物`);
+    if (rw>0) this.log(`💧 净水储备 Lv${rw}：末日+${rw*6}水`);
+    if (rd>0) this.log(`🛡️ 防御装甲 Lv${rd}：末日+${rd*12}防御`);
+    if (re>0) this.log(`⚡ 爽度加速 Lv${re}：末日+${re*3}爽度/天`);
   },
 
   // ========================================
@@ -2929,7 +3047,10 @@ const G = {
           防爆门缓缓打开。零下六十度的风夹着雪花灌进来。但你第一次觉得——外面的世界，好像没那么冷了。<br><br>
           <span style="color:#ffd700;font-weight:900">你活着离开了。</span>
         </div>
-        <button class="ending-btn" style="background:linear-gradient(135deg,#0066cc,#0044aa)" onclick="G.resolveSpecialEnding('helicopter')">登上直升机 →</button>`;
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="ending-btn" style="border-color:#00aaff;color:#00aaff" onclick="G.resolveSpecialEnding('helicopter')">登上直升机 →</button>
+          <button class="ending-btn" style="border-color:#333;color:#555;font-size:12px" onclick="G.declineSpecialEnding()">这里就是我的家。我哪也不去。</button>
+        </div>`;
     } else if (type === 'dungeon') {
       overlay.style.background = 'linear-gradient(180deg,#000,#1a0a20)';
       box.innerHTML = `
@@ -2937,20 +3058,23 @@ const G = {
         <div class="ending-title" style="color:#bf5af2">地下城入口</div>
         <div style="color:#bf5af2;font-size:11px;margin-bottom:12px">隐藏结局 B · 深渊之下</div>
         <div class="ending-desc">
-          第${s.p2day}天。宁鸮的无人机在地下三层发现了一个巨大的空间——不是天然洞穴，是人工建造的。<br><br>
-          楚狄带队突入。回来时她的表情很复杂。<br><br>
+          第${s.p2day}天。${s.companions.includes('owl')?'宁鸮的无人机':'你的监控系统'}在地下深处发现了一个巨大的空间——不是天然洞穴，是人工建造的。<br><br>
+          ${s.companions.includes('hunter')?'楚狄带队突入。回来时她的表情很复杂。':'你鼓起勇气独自探入。眼前的景象让你呆住了。'}<br><br>
           <span style="color:#bf5af2;font-weight:900">"下面有一座城。"</span><br><br>
           有电，有水，有完整的生态循环系统。空无一人，但所有设备都在运转。墙上刻着一行字：<br><br>
           <span style="color:#ffd700;font-style:italic">"欢迎回家。——第七次文明遗赠"</span><br><br>
           ${s.p2Flags.includes('found_floor_below') ? '你想起了那个被凿开的地板、那张照片上和你一模一样的面孔、那句"第三次了，希望这次能成功"。<br>现在你明白了——那不是第三次。是第六次。而你，是第七次。<br><br>' : ''}
-          ${s.usedEvents.includes('dead_radio') ? '收音机里那个女人的声音回响在你脑海里："不要打开地下三层的门。"<br>但这里是地下二层。她说的门——在更深处。也许有一天你会去看看。<br><br>' : ''}
-          黎冥检测了水和空气。一切正常。不，不只是正常——比你的避难所好十倍。<br><br>
-          宁鸮推了推眼镜："搬家？"<br>
-          楚狄把军刀插在桌上："我去开路。"<br>
-          黎冥微笑着提起药箱："新家需要一个诊所。"<br><br>
+          ${s.usedEvents.includes('dead_radio') ? '收音机里那个女人的声音回响在你脑海里："不要打开门。无论听到什么声音。"<br>她不是在警告你远离这里——她是在警告上一批来客。她失败了。而你，找到了她没能找到的入口。<br><br>' : ''}
+          ${s.companions.includes('seed')?'黎冥检测了水和空气。一切正常。不，不只是正常——比你的避难所好十倍。<br><br>':'你检查了水和空气。奇迹般地，一切正常。比你的避难所好十倍。<br><br>'}
+          ${s.companions.includes('owl')?'宁鸮推了推眼镜："搬家？"<br>':''}
+          ${s.companions.includes('hunter')?'楚狄把军刀插在桌上："我去开路。"<br>':''}
+          ${s.companions.includes('seed')?'黎冥微笑着提起药箱："新家需要一个诊所。"<br><br>':'<br>'}
           <span style="color:#ffd700;font-weight:900">末日不是终点。是入口。</span>
         </div>
-        <button class="ending-btn" style="background:linear-gradient(135deg,#8800cc,#6600aa)" onclick="G.resolveSpecialEnding('dungeon')">进入地下城 →</button>`;
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="ending-btn" style="border-color:#bf5af2;color:#bf5af2" onclick="G.resolveSpecialEnding('dungeon')">进入地下城 →</button>
+          <button class="ending-btn" style="border-color:#333;color:#555;font-size:12px" onclick="G.declineSpecialEnding()">地下的东西……还是别碰了。</button>
+        </div>`;
     }
 
     overlay.classList.add('show');
@@ -2960,15 +3084,27 @@ const G = {
   resolveSpecialEnding(type) {
     document.getElementById('endingOverlay').classList.remove('show');
     const s = this.s;
+    s.done = true;
     // Special endings get massive bonus scores
     if (type === 'helicopter') {
+      s.flags.heliTriggered = true;
       s.euphCurrency += 3000;
       s.p2day = 60; // Count as full survival
     } else if (type === 'dungeon') {
+      s.flags.dungeonTriggered = true;
       s.euphCurrency += 5000;
       s.p2day = 60;
     }
     this.endGame();
+  },
+
+  declineSpecialEnding() {
+    document.getElementById('endingOverlay').classList.remove('show');
+    const s = this.s;
+    this.log('你选择留下。这里就是你的战场。');
+    this.notif('继续生存……','success');
+    this.resumeGame();
+    this.render();
   },
 
   applyMetaUnlocks() {
@@ -2983,8 +3119,74 @@ const G = {
       document.getElementById('endScreen').classList.remove('show');
       document.getElementById('darkMarket').classList.remove('show');
       clearInterval(this.tickTimer);
+      this.clearSave();
       this.init();
     }
+  },
+
+  // ========================================
+  // SAVE / LOAD SYSTEM (localStorage)
+  // ========================================
+  SAVE_KEY: 'doomsday_save_v1',
+
+  saveGame() {
+    try {
+      localStorage.setItem(this.SAVE_KEY, JSON.stringify({ state: this.s, ts: Date.now() }));
+    } catch(e) {}
+  },
+
+  loadSave() {
+    try {
+      const raw = localStorage.getItem(this.SAVE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!data || !data.state) return null;
+      return data;
+    } catch(e) { return null; }
+  },
+
+  hasSave() {
+    return !!this.loadSave();
+  },
+
+  clearSave() {
+    try { localStorage.removeItem(this.SAVE_KEY); } catch(e) {}
+  },
+
+  resumeFromSave() {
+    const save = this.loadSave();
+    if (!save) return;
+    this.s = save.state;
+    // Ensure new fields exist for saves from older versions
+    if (this.s.noEventDays === undefined) this.s.noEventDays = 0;
+
+    const o = document.getElementById('intro-overlay');
+    o.classList.add('fade-out');
+    setTimeout(() => {
+      o.style.display = 'none';
+      document.getElementById('app').classList.add('show');
+
+      WH.clearAll();
+      if (this.s.phase === 1) {
+        WH.init();
+        // Rebuild warehouse visuals from stock
+        Object.entries(this.s.stock).forEach(([itemId, qty]) => {
+          const itemDef = this.ITEMS.find(x => x.id === itemId);
+          if (itemDef && qty > 0) WH.addItem(itemDef, qty);
+        });
+      } else {
+        WH.stopLoop();
+        document.getElementById('exposureWrap').classList.add('show');
+        document.getElementById('crtOverlay').classList.add('active');
+        document.getElementById('appBar').classList.add('four-col');
+        document.querySelector('.topbar .title').textContent = 'SURVIVAL';
+        document.getElementById('storyPane').innerHTML = '';
+      }
+
+      this.render();
+      this.startClock();
+      this.notif('✅ 游戏已恢复', 'success');
+    }, 300);
   }
 };
 
