@@ -75,7 +75,7 @@ const G = {
     let i = 0;
     const ti = setInterval(() => {
       if (i < text.length) { el.innerHTML += text[i]; i++; }
-      else { clearInterval(ti); setTimeout(() => this.glitch(), 800); }
+      else { clearInterval(ti); setTimeout(() => this.glitch(), 2500); }
     }, 35);
   },
 
