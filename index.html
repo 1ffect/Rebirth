@@ -175,6 +175,99 @@ body{font-family:'Noto Sans SC',-apple-system,'PingFang SC',sans-serif;color:#e0
 .base-card.done{opacity:0.4;border-color:#333}
 .base-card.done .base-btn{display:none}
 
+/* ===== PHASE 2: SURVIVAL ===== */
+#phase2Transition{position:fixed;inset:0;z-index:9999;background:#000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:20px}
+#phase2Transition.show{display:flex}
+.p2-title{font-family:'Orbitron',monospace;font-size:28px;color:#ff1744;text-shadow:0 0 40px rgba(255,23,68,0.6);letter-spacing:4px;animation:p2TitleIn 2s ease}
+@keyframes p2TitleIn{0%{opacity:0;transform:scale(0.5);filter:blur(10px)}50%{opacity:1;transform:scale(1.1)}100%{transform:scale(1)}}
+.p2-sub{color:#888;font-size:13px;opacity:0;animation:fadeIn 1s ease 1.5s forwards;text-align:center;line-height:1.8}
+.p2-btn{margin-top:20px;padding:14px 40px;background:linear-gradient(135deg,#ff1744,#d50000);border:2px solid #ff5252;color:#fff;font-family:inherit;font-weight:900;font-size:15px;border-radius:6px;cursor:pointer;letter-spacing:2px;opacity:0;animation:btnIn 0.5s ease 2.5s forwards}
+.p2-btn:active{transform:scale(0.95)}
+
+.exposure-wrap{padding:3px 12px;background:#0a0010;border-bottom:1px solid #330022;display:none;flex-shrink:0}
+.exposure-wrap.show{display:block}
+.exposure-bar{height:8px;background:#1a1a2a;border-radius:4px;overflow:hidden}
+.exposure-fill{height:100%;border-radius:4px;transition:width 0.6s;background:linear-gradient(90deg,#ff6b35,#ff1744,#ff0055)}
+.exposure-fill.danger{animation:exposePulse 0.6s infinite}
+@keyframes exposePulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.8)}}
+.exposure-label{display:flex;justify-content:space-between;font-size:9px;color:#888;margin-top:2px}
+.exposure-label .val{color:#ff1744;font-weight:900}
+
+.swipe-area{display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;min-height:220px;padding:10px}
+.swipe-card{width:100%;max-width:320px;background:linear-gradient(135deg,#141e30,#0f1825);border:2px solid #2a3a5a;border-radius:16px;padding:20px;touch-action:none;user-select:none;cursor:grab;transition:transform 0.3s,box-shadow 0.2s;position:relative}
+.swipe-card.dragging{cursor:grabbing;transition:none}
+.swipe-card .card-avatar{font-size:48px;text-align:center;margin-bottom:8px}
+.swipe-card .card-title{color:#ffd700;font-size:16px;font-weight:900;text-align:center;margin-bottom:8px}
+.swipe-card .card-desc{color:#bbb;font-size:12px;line-height:1.8;background:#0a1020;padding:12px;border-radius:8px;margin-bottom:10px}
+.swipe-card .card-costs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+.swipe-card .card-costs span{font-size:10px;background:#1a2a40;padding:2px 8px;border-radius:4px;color:#aaa}
+.swipe-card .swipe-label{position:absolute;top:15px;font-size:20px;font-weight:900;padding:4px 14px;border:3px solid;border-radius:8px;opacity:0;pointer-events:none;transition:opacity 0.15s}
+.swipe-card .lbl-left{left:15px;color:#32d74b;border-color:#32d74b;transform:rotate(-15deg)}
+.swipe-card .lbl-right{right:15px;color:#ff453a;border-color:#ff453a;transform:rotate(15deg)}
+.swipe-card.swiping-left .lbl-left{opacity:1}
+.swipe-card.swiping-right .lbl-right{opacity:1}
+.swipe-card .card-hint{display:flex;justify-content:space-between;font-size:10px;margin-top:8px}
+.swipe-card .h-left{color:#32d74b;opacity:0.6}
+.swipe-card .h-right{color:#ff453a;opacity:0.6}
+.swipe-btns{display:flex;gap:12px;justify-content:center;padding:8px;flex-shrink:0}
+.swipe-btn{padding:10px 24px;border-radius:50px;border:2px solid;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.swipe-btn:active{transform:scale(0.95)}
+.swipe-btn.accept{background:rgba(50,215,75,0.1);border-color:#32d74b;color:#32d74b}
+.swipe-btn.reject{background:rgba(255,69,58,0.1);border-color:#ff453a;color:#ff453a}
+.no-event{text-align:center;color:#555;font-size:13px;padding:40px 20px}
+.no-event .big-icon{font-size:48px;margin-bottom:12px;opacity:0.5}
+
+.chat-wrap{display:flex;flex-direction:column;gap:6px;padding:4px 0}
+.chat-msg{display:flex;gap:8px;align-items:flex-start;animation:fadeIn 0.3s}
+.chat-msg .c-avatar{font-size:18px;flex-shrink:0;width:26px;text-align:center;padding-top:2px}
+.chat-msg .c-bubble{background:#141e30;border:1px solid #1f3050;border-radius:10px;padding:8px 10px;font-size:11px;line-height:1.6;max-width:85%}
+.chat-msg .c-name{color:#ff6b35;font-weight:900;font-size:9px;margin-bottom:1px}
+.chat-msg .c-text{color:#ccc}
+.chat-msg.sys .c-bubble{background:#1a0a0a;border-color:#330000}
+.chat-msg.sys .c-text{color:#ff453a;font-weight:700}
+
+.comp-card{background:#141e30;border:1px solid #1f3050;border-radius:8px;padding:10px;margin-bottom:6px;display:flex;gap:10px;align-items:center;position:relative;overflow:hidden}
+.comp-card .comp-av{font-size:28px}
+.comp-card .comp-info{flex:1}
+.comp-card .comp-name{color:#ffd700;font-weight:900;font-size:12px}
+.comp-card .comp-title{color:#ff6b35;font-size:10px;font-weight:700}
+.comp-card .comp-rarity{font-size:8px;padding:1px 6px;border-radius:3px;font-weight:900;display:inline-block;margin-left:4px}
+.comp-card .comp-rarity.SSR{background:#ff6b35;color:#fff}
+.comp-card .comp-rarity.SR{background:#bf5af2;color:#fff}
+.comp-card .comp-eff{color:#888;font-size:9px;margin-top:2px}
+
+.mkt-item{background:#141e30;border:1px solid #1f3050;border-radius:8px;padding:12px;margin-bottom:6px;cursor:pointer;transition:all 0.15s}
+.mkt-item:active{transform:scale(0.97);border-color:#bf5af2}
+.mkt-item.disabled{opacity:0.3;pointer-events:none}
+.mkt-item .mkt-name{color:#ffd700;font-weight:900;font-size:12px;margin-bottom:2px}
+.mkt-item .mkt-desc{color:#888;font-size:10px;line-height:1.4}
+.mkt-item .mkt-cost{color:#bf5af2;font-weight:900;font-size:11px;margin-top:4px}
+
+#raidOverlay{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+#raidOverlay.show{display:flex}
+.raid-box{text-align:center;max-width:320px;animation:shakeIt 0.5s ease}
+.raid-box h2{color:#ff1744;font-size:20px;font-weight:900;margin-bottom:10px;text-shadow:0 0 20px rgba(255,23,68,0.5)}
+.raid-box .raid-desc{color:#ccc;font-size:12px;line-height:1.8;margin-bottom:14px}
+.raid-box .raid-result{padding:12px;border-radius:8px;font-size:13px;font-weight:900;margin-bottom:12px}
+.raid-box .raid-result.win{background:rgba(50,215,75,0.1);border:1px solid #32d74b;color:#32d74b}
+.raid-box .raid-result.lose{background:rgba(255,69,58,0.1);border:1px solid #ff453a;color:#ff453a}
+.raid-box .raid-btn{padding:12px 30px;background:linear-gradient(135deg,#ff6b35,#ff1744);border:none;color:#fff;font-weight:900;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px}
+
+.app-bar.four-col{grid-template-columns:repeat(4,1fr)}
+
+/* ===== SSR COMPANION CARDS ===== */
+.comp-card.ssr{background:linear-gradient(135deg,#1a0a2a,#0f1825);border:1px solid #ff6b35;box-shadow:0 0 12px rgba(255,107,53,0.15)}
+.comp-card.ssr::before{content:'';position:absolute;inset:0;border-radius:8px;background:linear-gradient(135deg,rgba(255,107,53,0.05),rgba(191,90,242,0.05));pointer-events:none}
+.comp-card.mystery{opacity:0.4;border-style:dashed}
+.comp-card.ssr-mystery{border-color:#ff6b35;opacity:0.25}
+.comp-hook{color:#555;font-size:9px;line-height:1.4;margin-top:4px;padding:4px 6px;background:rgba(255,107,53,0.05);border-left:2px solid #ff6b35;border-radius:0 4px 4px 0}
+
+/* Bond system */
+.bond-wrap{margin:3px 0}
+.bond-label{font-size:9px;font-weight:900;margin-bottom:2px}
+.bond-bar{height:4px;background:#1a1a2a;border-radius:2px;overflow:hidden;width:100%}
+.bond-fill{height:100%;border-radius:2px;transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1)}
+
 @media(max-width:420px){.status-bar{grid-template-columns:repeat(2,1fr)}.m-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -217,6 +310,10 @@ body{font-family:'Noto Sans SC',-apple-system,'PingFang SC',sans-serif;color:#e0
     <button style="background:#1a1a2a;border:1px solid #333;color:#888;padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:inherit" onclick="G.reset()">重开</button>
   </div>
   <div class="status-bar" id="statusBar"></div>
+  <div class="exposure-wrap" id="exposureWrap">
+    <div class="exposure-bar"><div class="exposure-fill" id="exposureFill" style="width:0%"></div></div>
+    <div class="exposure-label"><span>🔴 暴露度</span><span class="val" id="exposureVal">0%</span></div>
+  </div>
   <div class="warehouse-wrap" id="warehouseWrap">
     <canvas id="whCanvas"></canvas>
     <div class="cap-bar-wrap"><div class="cap-fill green" id="capFill" style="width:0%"></div></div>
@@ -231,6 +328,12 @@ body{font-family:'Noto Sans SC',-apple-system,'PingFang SC',sans-serif;color:#e0
 <div class="modal-overlay" id="modalOverlay"><div class="modal" id="modal"></div></div>
 <div class="notif" id="notif"></div>
 <div class="end-screen" id="endScreen"></div>
+<div id="phase2Transition">
+  <div class="p2-title">末 日 降 临</div>
+  <div class="p2-sub" id="p2Sub"></div>
+  <button class="p2-btn" onclick="G.enterPhase2()">进入避难所</button>
+</div>
+<div id="raidOverlay"><div class="raid-box" id="raidBox"></div></div>
 
 <script>
 // ========================================
@@ -605,10 +708,227 @@ const G = {
       ]}
   ],
 
+  // ===== PHASE 2 DATA =====
+  COMPANIONS: [
+    // ===== SSR: 三位核心女性同伴 =====
+    { id:'owl', name:'宁鸮', code:'夜鸮', title:'网络安全架构师', icon:'🦉', rarity:'SSR',
+      passive:{ defense:8, foodSave:0, exposureDecay:0, euphPerDay:0, defBonus:0,
+               exposureSlowdown:0.5, autoBlockRaid:true },
+      desc:'顶尖财团的网络安全架构师。冷酷、毒舌，穿着沾满灰尘的西装倒在门外——手里攥着一个U盘和你的银行账户截图。',
+      hook:'你Phase 1疯狂套现时利用的金融后门漏洞，正是她当年故意留下的。她不是来求救的——她是来"索要版权费"的。',
+      chatIntro:'……别误会，我不是来求救的。你能活着刷爆那些账户，全靠我当年留的后门。所以——你欠我的。',
+      chatLines:[
+        '你的防火墙跟纸糊的一样。已经帮你重写了。不用谢。',
+        '拦截了一个扫描信号。有人在搜你的位置。已处理。',
+        '外面那些暴徒的通讯协议……幼稚。已经接管了他们的频道。',
+        '你的物资管理系统效率太低。我优化了。省了30%算力。',
+        '（宁鸮盯着屏幕，蓝光映在镜片上，嘴角微微上扬）'
+      ],
+      bondLines: {
+        0: ['你这个人，运气好过脑子。','……别跟我说话。我在工作。','你知道你欠我多少吗？按复利算。'],
+        1: ['你的决策比我预估的……稍微不那么愚蠢。','咖啡。黑的。不加糖。这是命令。','我检查了结构强度。你选的基建方案……还行。'],
+        2: ['不要死。你死了我的代码就没人用了。','……我帮你守着。去睡吧。你三天没合眼了。','（她把外套轻轻搭在你肩上，假装什么都没发生）'],
+        3: ['你的命是用我的代码买来的，除了我，谁也拿不走。','（她切断了自己的维生设备，屏幕上算力飙升200%）……值得。','如果世界重建……我只需要一个网络、一杯咖啡，和你的Wi-Fi密码。']
+      }
+    },
+    { id:'hunter', name:'楚狄', code:'月狩', title:'退役雇佣兵', icon:'🏹', rarity:'SSR',
+      passive:{ defense:20, foodSave:0, exposureDecay:2, euphPerDay:0, defBonus:0,
+               dailyScavenge:true, rightSwipeBonus:2 },
+      desc:'黑色作战服、短发、伤疤从左眉划到下巴。退役雇佣兵，地下黑拳冠军。身中数枪倒在门外，手里还攥着一把开了刃的猎刀。',
+      hook:'你Phase 1借取最高额度的"资产抵押"时，背后黑市债主雇佣了楚狄在末日当天来暗杀你、夺取避难所。但她被雇主背叛，身中数枪——你开门时面对的是一个原本要杀你的人。',
+      chatIntro:'……你救错人了。我本来是来杀你的。但那个狗日的雇主先给了我三枪。所以……暂且两清。',
+      chatLines:[
+        '出去转了一圈。带回来一箱军粮和两瓶净水。别问我怎么搞到的。',
+        '门口发现脚印，三个人，带武器。已清除。',
+        '（楚狄在角落默默擦拭猎刀，刀面映出你的倒影）',
+        '外面零下六十度。我穿短袖都比那些暴徒扛冻。',
+        '你做的那个……和牛。还行。比军粮好咽。'
+      ],
+      bondLines: {
+        0: ['别靠太近。我咬人。','我不是你的狗。帮你杀人是因为你救了我。仅此而已。','（楚狄蜷在离你最远的角落，但眼睛始终盯着门的方向）'],
+        1: ['……你做的饭不难吃。就这样。','有人敲门你别开。让我先看。','（你半夜醒来发现她坐在你房门口，攥着刀）……路过。'],
+        2: ['浴缸的水温调到42度了。别问我怎么知道你喜欢这个温度。','那个疤？无所谓。反正末日了谁还看脸。……你在看。','（她第一次背对着你睡着了）'],
+        3: ['外面的世界脏透了，但我会保住你这方干净的乌托邦。','（暴徒攻城时，她单枪匹马杀入尸山血海，回来时浑身是血）——没受伤。别哭。','如果末日结束……我可以继续当你的保镖吗？免费的那种。']
+      }
+    },
+    { id:'seed', name:'黎冥', code:'冥种', title:'植物学博士', icon:'🌺', rarity:'SSR',
+      passive:{ defense:0, foodSave:0.2, exposureDecay:0, euphPerDay:10, defBonus:0,
+               greenhouse:true, darkNutrient:true },
+      desc:'柔弱纤细的女人，怀里抱着一盆快枯死的植物，浑身湿透倒在暴雨中。声音很轻很软："……能收留我吗？我会种菜。"',
+      hook:'她随身携带的植物是某种高度变异的真菌。外面的末日病毒，有一半是她所在的研究所泄漏的。她来这里，是为了拿你的"高配避难所"当她的终极培养皿。',
+      chatIntro:'谢谢你……这个地方好温暖。你放心，我会让这里开满花的。（她微微笑着，但眼睛里有一瞬间的冰冷）',
+      chatLines:[
+        '水培系统稳定了。今天收获了三十棵生菜和一筐草莓呢。',
+        '我给大家调了新的营养液，喝完会睡得很好哦。',
+        '（黎冥在温室里哼着歌，指尖划过叶片，植物以肉眼可见的速度生长）',
+        '外面有人想闯进来？……没关系，我的孢子云会让他们迷路的。',
+        '你今天看起来气色不好。来，喝点我特调的花茶。'
+      ],
+      bondLines: {
+        0: ['我什么都不会，只会种花……你不会赶我走吧？','（她缩在角落，像一株受惊的含羞草）','这盆花快死了……能给我一点水吗？'],
+        1: ['你喜欢草莓吗？我专门种了你爱吃的品种呢。','（你发现温室里多了很多奇怪的、叫不出名字的植物）','营养液的配方改良了，大家体力恢复快了很多。'],
+        2: ['那个上门找茬的人？……我让他帮忙施肥去了。别多想。','你有没有觉得……离开温室就不太舒服？大概是外面空气不好吧。','（她在你睡着时轻轻抚摸你的头发，指尖有淡淡的荧光）'],
+        3: ['只要你乖乖待在我的温室里，我保证你永远不用面对外面的地狱。','这个避难所现在是我的温室，而你……是我最珍贵的花。','（你发现自己已经离不开她调配的"营养液"了。但你不在乎。）']
+      }
+    },
+    // ===== SR: 辅助同伴 =====
+    { id:'chef', name:'陈婉', code:null, title:'米其林主厨', icon:'👩‍🍳', rarity:'SR',
+      passive:{ defense:0, foodSave:0.3, exposureDecay:0, euphPerDay:15, defBonus:0 },
+      desc:'前米其林三星主厨。"世界毁灭也要吃得有尊严。"',
+      hook:null,
+      chatIntro:'你的食材储备……天哪，我能把压缩饼干做出法餐口感。',
+      chatLines:['今晚菜单：和牛寿喜烧配松露酱。','用咖啡渣做了提拉米苏！','吃饱才有力气活，这是科学。','给大家炖了骨头汤，暖身子。'],
+      bondLines:null },
+    { id:'dog', name:'阿黄', code:null, title:'忠犬护卫', icon:'🐕', rarity:'SR',
+      passive:{ defense:10, foodSave:0, exposureDecay:1, euphPerDay:5, defBonus:0 },
+      desc:'伤痕累累的德牧。眼神全是警惕，但对你摇了尾巴。',
+      hook:null,
+      chatIntro:null,
+      chatLines:['（阿黄在门口巡逻，耳朵竖直）','（阿黄叼来一只兔子！加餐）','（阿黄突然低吼——有人靠近）','（阿黄蜷在你脚边睡着了）'],
+      bondLines:null },
+  ],
+
+  P2_EVENTS: [
+    { id:'stray_dog', day:[1,5], type:'bond', once:true, companionId:'dog',
+      title:'门外的流浪狗', avatar:'🐕',
+      desc:'一只伤痕累累的德牧在门外刨土，嘴里叼着包裹。看到监控亮了，冲你摇了摇尾巴。',
+      left:{ label:'开门 + 喂食', cost:{food:5},
+        text:'它扑进来舔你的手。包裹里是一件防弹衣。', defBonus:10 },
+      right:{ label:'关门', euph:5, exposure:2,
+        text:'狗蹲了一夜。天亮后消失了。' } },
+    { id:'neighbor', day:[2,6], type:'resource', once:true,
+      title:'楼上王大爷', avatar:'👴',
+      desc:'83岁的王大爷颤巍巍敲门："闺女，能匀两瓶水吗……大爷给你磕头了。"',
+      left:{ label:'给水+药', cost:{water:3,med:1},
+        text:'他留下珍藏40年的收音机。（每日+5爽度）', euphPerDay:5 },
+      right:{ label:'装没人', euph:15, exposure:3,
+        text:'缓慢的脚步声远去。群聊有人说王大爷倒在楼道了。' } },
+    { id:'recruit_owl', day:[3,8], type:'bond', once:true, companionId:'owl',
+      title:'⌜夜鸮⌟ 门外的西装女人', avatar:'🦉',
+      desc:'监控画面：一个穿灰色西装的女人靠在防爆门上，镜片反光看不清表情。她举起U盘对准摄像头——屏幕弹出你的银行流水截图。\n\n她按了三下门铃，节奏是摩尔斯电码：C-O-D-E。',
+      left:{ label:'开门（她知道你的账户）', cost:{water:2},
+        text:'她站起来，拍了拍灰尘："你能刷爆那些卡，全靠我留的后门。所以——你欠我。" 暴露度大幅下降。', exposureReduce:15 },
+      right:{ label:'可能是黑客陷阱', euph:5, exposure:3,
+        text:'她在门外站了六个小时，然后把U盘插进门禁接口。屏幕闪了一下——你的防火墙被升级了。纸条："免费试用。下次见。"' } },
+    { id:'ex_colleague', day:[4,10], type:'trap', once:true,
+      title:'前同事的语音', avatar:'👩‍💼',
+      desc:'曾打压你的女同事哭着发语音："求求你，我高烧40度，只要一口水……我给你跪下了。"',
+      left:{ label:'给水和药', cost:{water:2,med:1},
+        trapChance:0.7, trapText:'她把你坐标卖给了暴民团伙！', trapExposure:20,
+        safeText:'她感恩离开了。也许人心没完全冷透。', safeEuph:10 },
+      right:{ label:'"多喝热水 :)"', euph:25, exposure:5,
+        text:'四个字回复。群聊炸了。她回复不堪入目，但你觉得很爽。' } },
+    { id:'recruit_hunter', day:[5,12], type:'bond', once:true, companionId:'hunter',
+      title:'⌜月狩⌟ 满身弹孔的暗影', avatar:'🏹',
+      desc:'监控画面：黑色作战服的短发女人跌跌撞撞走来，腹部在流血，手里攥着猎刀。她身后——三个持枪暴徒正在逼近。\n\n她没有敲门。她靠在门上，用刀在金属板上刻了一行字："债主派我来杀你。他们先杀了我。"',
+      left:{ label:'开门 + 火力掩护', cost:{med:5,food:3,water:3},
+        text:'你拖她进来的瞬间，她反手一刀切断了追踪器。"……两清了。但那三个人我得出去解决。" 五分钟后她回来了，浑身是血，手里多了一箱军粮。', exposureReduce:10 },
+      right:{ label:'她说过要杀你', euph:5, exposure:5,
+        text:'三声枪响。然后是沉默。雪地上只剩猎刀和一滩血。你捡起刀——刀柄上刻着月亮。' } },
+    { id:'recruit_chef', day:[6,14], type:'bond', once:true, companionId:'chef',
+      title:'背着锅的女人', avatar:'👩‍🍳',
+      desc:'衣着讲究但疲惫的女人站在门口，背上居然背着铸铁锅。"我是厨师。给我食材，我让你吃到米其林。"',
+      left:{ label:'收留', cost:{food:8},
+        text:'她用压缩饼干做出让人流泪的晚餐。食材消耗降低了。' },
+      right:{ label:'不需要厨师', euph:10, exposure:3,
+        text:'她抱着锅消失在风雪中。你打开自热火锅，突然索然无味。' } },
+    { id:'ex_bf', day:[5,15], type:'trap', once:true,
+      title:'前男友来电', avatar:'🤡',
+      desc:'前男友打来电话："宝贝我快冻死了，我们和好吧？我有车，我什么都给你……"',
+      left:{ label:'让他进来', cost:{food:2},
+        trapChance:0.5, trapText:'他带了三个兄弟冲进来抢劫！防御触发！', trapExposure:15, trapDefCheck:true,
+        safeText:'他确实带了一车物资。动机可疑但食物是真的。', safeReward:{food:10,water:5} },
+      right:{ label:'挂断+拉黑', euph:30, exposure:3,
+        text:'挂断瞬间前所未有的畅快。群聊姐妹疯狂点赞。' } },
+    { id:'mystery_box', day:[6,14], type:'random', once:true,
+      title:'神秘包裹', avatar:'📦',
+      desc:'门口出现无标记金属箱。纸条："给还活着的人。——一个已经走了的人"',
+      left:{ label:'打开', cost:{},
+        randomOutcomes:[
+          { chance:0.5, text:'50份军用口粮和净水片！', reward:{food:20,water:15} },
+          { chance:0.3, text:'一套完整防弹装甲！', reward:{defense:15} },
+          { chance:0.2, text:'只有遗书和全家福。你沉默了很久。', reward:{euph:20} }
+        ] },
+      right:{ label:'可能是陷阱', euph:5, exposure:0,
+        text:'你盯了它三天。第三天有人搬走了。' } },
+    { id:'recruit_seed', day:[8,16], type:'bond', once:true, companionId:'seed',
+      title:'⌜冥种⌟ 暴雨中的白月光', avatar:'🌺',
+      desc:'凌晨两点，暴雨。监控里出现一个瘦弱的身影——白裙子湿透贴在身上，怀里紧紧抱着一盆快枯死的植物。\n\n她抬头看向摄像头，雨水和泪水混在一起："……求你了，让我进去。它快死了。"\n\n（系统提示：检测到未知生物信号。来源：她怀中的植物。）',
+      left:{ label:'开门（她太可怜了）', cost:{food:2,water:3},
+        text:'她进来后第一件事是给植物浇水。然后才发现自己在发抖。你递给她毛毯时，她笑了——很轻、很软、很好看。三天后，温室里长出了第一批草莓。',
+        euphPerDay:3 },
+      right:{ label:'生物信号太可疑', euph:-5, exposure:0,
+        text:'她跪在门外淋了一整夜。天亮时，那盆植物开了一朵黑色的花。然后她和花一起消失了。你的门上长出了一层薄薄的苔藓——怎么刮都刮不掉。' } },
+    { id:'gang_threat', day:[8,28], type:'threat', once:false, cooldown:5,
+      title:'暴民最后通牒', avatar:'💀',
+      desc:'对讲机沙哑的声音："我们知道你在里面。交出一半物资。不然——你知道后果。"',
+      left:{ label:'交物资求和', cost:{food:10,water:8},
+        text:'你推出一箱物资。脚步声远去。暂时安全。', exposureReduce:10 },
+      right:{ label:'一个字：滚', euph:35, exposure:15,
+        text:'"你有种。"那头沉默了。"我们会回来的。"' } },
+    // SSR 羁绊深化事件
+    { id:'owl_bond_up', day:[12,20], type:'bond_event', once:true, requiresCompanion:'owl',
+      title:'⌜夜鸮⌟ 午夜的真相', avatar:'🦉',
+      desc:'凌晨三点，宁鸮把你叫到服务器前。屏幕上是你Phase 1所有套现操作的路径图——每一笔都精确标注了时间和漏洞编号。\n\n"这些后门是我五年前埋的。为了炸掉那个吃人的财团。"她摘下眼镜，第一次直视你的眼睛。"你是第一个真正用它来活命的人。"\n\n她顿了顿："外面正在扫描我们的IP。我可以用这台服务器反制——但需要切断温控系统两小时。避难所温度会降到零下。"',
+      left:{ label:'忍两小时（信任她）', cost:{med:1},
+        text:'零下十度的两小时。你们裹着毛毯背靠背坐着。她说："……谢谢你没问为什么。"IP永久消失在雷达上。', exposureReduce:25 },
+      right:{ label:'太冒险了', euph:10, exposure:0,
+        text:'"……也对。信任是奢侈品。"她戴回眼镜，继续敲键盘。但你注意到她的手在发抖。' } },
+    { id:'hunter_bond_up', day:[14,22], type:'bond_event', once:true, requiresCompanion:'hunter',
+      title:'⌜月狩⌟ 刀背上的名字', avatar:'🏹',
+      desc:'楚狄高烧不退。你给她换冰毛巾时，发现她攥着猎刀不放——刀背上刻着一个名字，被划掉了，但隐约能看出是……你的名字。\n\n她烧迷糊了，抓住你的手："……目标已锁定……取消任务……取消……"\n\n她在说梦话。关于那个暗杀任务。关于她为什么没有在你开门的那一刻动手。',
+      left:{ label:'握住她的手（留下来）', cost:{med:2,water:1},
+        text:'你握了一整夜。天亮时她退烧了，看见你红肿的眼睛。沉默了很久，然后把猎刀递给你："帮我把那个名字彻底磨掉。"', defBonus:15 },
+      right:{ label:'放下药就走', euph:15, exposure:0,
+        text:'你轻轻放下她的手。半夜听到角落传来很轻的、像是在忍耐什么的呼吸声。' } },
+    { id:'seed_bond_up', day:[16,24], type:'bond_event', once:true, requiresCompanion:'seed',
+      title:'⌜冥种⌟ 温室里的秘密', avatar:'🌺',
+      desc:'你半夜起来找水喝，经过温室时发现——那些植物在黑暗中发着幽绿色的荧光。黎冥坐在中央，赤脚踩在泥土里，周围的菌丝像血管一样蔓延。\n\n她发现了你："啊……你看到了。"她的语气没有惊慌，反而是一种释然。\n\n"这些菌种是我从研究所带出来的。外面的病毒……有一半是我们泄漏的。"她低下头。"我来这里……最初是想拿你的避难所当培养皿。"\n\n"但是……"她抬起头，月光下她的眼睛湿润了。"但是你给了我草莓种子和温水。没有人……给过我这些。"',
+      left:{ label:'"留下来。继续种花。"', cost:{food:3},
+        text:'她哭了。菌丝缓缓从墙壁上退回了花盆里。第二天，温室产量翻倍。你发现她的"营养液"确实让你精力充沛——但你不确定这是好事还是坏事。', euphPerDay:8 },
+      right:{ label:'"你需要解释更多。"', euph:0, exposure:0,
+        text:'"……好。"她站起来，赤足踩在冰冷的地板上。"但你可能不会喜欢答案。"那一夜你们谈了很久。真相比你想象的更复杂。' } },
+    { id:'radio_signal', day:[12,22], type:'resource', once:true,
+      title:'未知无线电', avatar:'📡',
+      desc:'收音机收到加密信号："北区物资站未被发现。仅限1人。48小时有效。"',
+      left:{ label:'派同伴前往', cost:{}, requireCompanion:true,
+        text:'同伴带回大量补给！但她说那里有人活动的痕迹……', reward:{food:15,water:10,med:3} },
+      right:{ label:'太可疑', euph:5, exposure:0,
+        text:'没有上当。或者，错过了救命的补给。谁知道呢。' } },
+    { id:'child_cry', day:[15,25], type:'emotional', once:true,
+      title:'凌晨三点的哭声', avatar:'👧',
+      desc:'凌晨3点，监控里出现裹着毛毯的小女孩。大概五六岁，一个人站在暴风雪里哭。没有大人。',
+      left:{ label:'开门', cost:{food:3,water:2,med:1},
+        text:'她不说话，只抱着你的腿。同伴们轮流照顾她。避难所有了真正的笑声。', euphPerDay:8 },
+      right:{ label:'……', euph:-10, exposure:0,
+        text:'你关掉监控。整夜没睡。第二天画面里已经没有人了。' } },
+    { id:'scavenger', day:[3,28], type:'resource', once:false, cooldown:4,
+      title:'独行拾荒者', avatar:'🧥',
+      desc:'沉默的蒙面人出现在监控，举起纸板："以物易物。食物换药品。公平交易。"',
+      left:{ label:'交易', cost:{food:5},
+        text:'公平交易完成。你得到了急需的医疗物资。', reward:{med:3} },
+      right:{ label:'不交易', euph:3, exposure:1,
+        text:'蒙面人站了一会儿，默默离开。' } },
+    { id:'weather', day:[5,28], type:'random', once:false, cooldown:4,
+      title:'极端天气警报', avatar:'🌨️',
+      desc:'气温骤降至-65°C。供暖系统在极限运转。今夜将是最难熬的一晚。',
+      left:{ label:'全力供暖', cost:{food:3},
+        text:'所有人挤在一起度过了这一夜。消耗额外食物，但都活下来了。' },
+      right:{ label:'节约物资硬扛', euph:0, exposure:0,
+        text:'你决定硬扛。有人冻伤了，消耗医疗物资。', penalty:{med:2} } },
+    { id:'broadcast', day:[25,29], type:'resource', once:true,
+      title:'最后的广播', avatar:'📻',
+      desc:'收音机传来微弱声音："这里是……南方安全区……坐标……幸存者……请坚持……"信号断了。',
+      left:{ label:'记录坐标', cost:{},
+        text:'你把坐标刻在墙上。也许这不是终点，而是新的起点。', reward:{euph:50} },
+      right:{ label:'可能是假的', euph:10, exposure:0,
+        text:'末日还能相信什么？守好脚下的一亩三分地。' } },
+  ],
+
   // ===== STATE =====
   newState() {
     return {
-      day:-30, hour:8, panic:5,
+      day:-30, hour:8, panic:5, phase:1,
       cash:0, debt:0,
       capacity:50, used:0,
       baseLv:0,
@@ -616,8 +936,16 @@ const G = {
       stock:{}, app:'finance',
       teammates:[], logs:[], flags:{}, done:false,
       intelSeen:[], tutorialStep:0,
-      // 3-button finance: track use count per button
-      finCount: { credit:0, loan:0, mortgage:0 }
+      finCount: { credit:0, loan:0, mortgage:0 },
+      // Phase 2
+      p2day:0, exposure:0, hp:100,
+      companions:[], companionBond:{}, chatLog:[],
+      foodPool:0, waterPool:0, medPool:0,
+      hasPower:false, hasGreenhouse:false,
+      defense:0, euphProd:0, euphCurrency:0,
+      pendingEvent:null, usedEvents:[], eventCooldowns:{},
+      bonusEuphPerDay:0, p2app:'swipe', starveDays:0,
+      tacticalWarning:false, defDebuffDays:0, companionDebuffs:{}
     };
   },
 
@@ -625,6 +953,13 @@ const G = {
   init() {
     this.s = this.newState();
     WH.clearAll();
+    document.getElementById('exposureWrap').classList.remove('show');
+    document.getElementById('phase2Transition').classList.remove('show');
+    document.getElementById('raidOverlay').classList.remove('show');
+    document.getElementById('endScreen').classList.remove('show');
+    document.getElementById('appBar').classList.remove('four-col');
+    const tt = document.querySelector('.topbar .title');
+    if (tt) tt.textContent = 'DOOMSDAY';
     this.showIntro();
   },
 
@@ -720,6 +1055,11 @@ const G = {
 
   updateCountdown() {
     const el = document.getElementById('countdownDigits');
+    if (this.s.phase === 2) {
+      el.textContent = `第${this.s.p2day}天 / 30天`;
+      el.classList.toggle('urgent', this.s.hp <= 30 || this.s.exposure >= 60);
+      return;
+    }
     const d = Math.max(0, Math.abs(this.s.day));
     const hrsLeft = Math.max(0, 24 - this.s.hour);
     const h = String(hrsLeft).padStart(2, '0');
@@ -728,18 +1068,21 @@ const G = {
   },
 
   advanceDay() {
-    this.s.day++;
-    this.s.panic = Math.min(100, this.s.panic + 3 + Math.floor(Math.random() * 5));
-    // Remind: credit刷完后 loan 自动解锁 (UI已处理)
-    // Unlock mortgage at day -10
-    if (this.s.day > -10 && !this.s.flags.mortgageUnlock && this.s.finCount.credit >= 3 && this.s.finCount.loan >= 4) {
-      this.s.flags.mortgageUnlock = true;
-      this.notif('🔓 【一键抵押全部家当】已解锁！', 'money');
+    if (this.s.phase === 1) {
+      this.s.day++;
+      this.s.panic = Math.min(100, this.s.panic + 3 + Math.floor(Math.random() * 5));
+      if (this.s.day > -10 && !this.s.flags.mortgageUnlock && this.s.finCount.credit >= 3 && this.s.finCount.loan >= 4) {
+        this.s.flags.mortgageUnlock = true;
+        this.notif('🔓 【一键抵押全部家当】已解锁！', 'money');
+      }
+      if (this.s.day >= 0) { this.pauseGame(); this.showPhase2Transition(); return; }
+      this.checkIntel();
+      this.triggerRandomEvent();
+      this.render();
+    } else {
+      this.s.p2day++;
+      this.p2ProcessDay();
     }
-    if (this.s.day >= 1) { this.s.done=true; clearInterval(this.tickTimer); this.endGame(); return; }
-    this.checkIntel();
-    this.triggerRandomEvent();
-    this.render();
   },
 
   // ===== INTEL =====
@@ -780,6 +1123,7 @@ const G = {
 
   // ===== RENDER =====
   render() {
+    if (this.s.phase === 2) { this.p2Render(); return; }
     this.updateStatusBar();
     this.updateAppBar();
     this.updateModulePanel();
@@ -1043,28 +1387,696 @@ const G = {
 
   endGame() {
     const s = this.s;
-    const cl = Math.floor(s.euphoria/20);
-    const types = Object.keys(s.stock).length;
-    const total = Object.values(s.stock).reduce((a,b)=>a+b,0);
+    if (s.phase === 1) { this.showPhase2Transition(); return; }
 
-    let r = '🪦 冻死街头';
-    if (cl >= 2 && total >= 3) r = '😐 勉强活着';
-    if (cl >= 5 && total >= 8) r = '😎 末日悠哉';
-    if (cl >= 10 && total >= 15) r = '👑 末日女王';
-    if (cl >= 18 && s.baseLv >= 2) r = '🏆 传奇·地下乌托邦建造者';
+    // Phase 2 ending
+    const survived = s.p2day;
+    const compCount = s.companions.length;
+    const alive = s.hp > 0;
+    let title, rating;
 
-    document.getElementById('endScreen').innerHTML = `<div class="content"><h1>末日降临</h1><p>${r}</p>
+    if (!alive) {
+      if (s.starveDays > 0) {
+        title = '🪦 饥寒交迫'; rating = `资源耗尽，你在第${survived}天倒下了。`;
+      } else {
+        title = '💀 防线崩溃'; rating = `暴徒攻破了避难所。你撑了${survived}天。`;
+      }
+    } else if (survived >= 30) {
+      const ssrCount = s.companions.filter(id=>this.COMPANIONS.find(x=>x.id===id&&x.rarity==='SSR')).length;
+      const maxBond = Math.max(0,...s.companions.map(id=>s.companionBond[id]||0));
+      if (ssrCount >= 3 && maxBond >= 3) { title = '🌹 命运共生体'; rating = '三位神话之女与你缔结了不可逆的羁绊。这是真正的末日传说。'; }
+      else if (ssrCount >= 2) { title = '🏆 末日女王阵营'; rating = '最强的同伴守护着你的乌托邦。传奇。'; }
+      else if (compCount >= 3) { title = '👑 末日女王'; rating = '30天。你不仅活下来了，还活得很好。'; }
+      else if (ssrCount >= 1 && maxBond >= 2) { title = '💕 命运的羁绊'; rating = '在末日中找到了不可替代的灵魂伴侣。'; }
+      else if (compCount >= 1) { title = '😎 末日搭子'; rating = '有人陪伴的末日，也没那么可怕。'; }
+      else { title = '😐 独狼生存'; rating = '你活下来了。但一个人的末日，太安静了。'; }
+    } else {
+      title = '😐 勉强生还'; rating = `你撑到了第${survived}天。`;
+    }
+
+    document.getElementById('endScreen').innerHTML = `<div class="content"><h1>${title}</h1><p>${rating}</p>
       <div class="stats">
-        最终现金：${this.fmtMoney(s.cash)}<br>
-        最终负债：${this.fmtMoney(s.debt)} <span style="color:#32d74b">(已清销！末日后银行不存在了)</span><br>
-        避难所等级：Lv${s.baseLv} ${this.BASE_TIERS[s.baseLv].name}<br>
-        仓库占用：${s.used} / ${s.capacity} m³<br>
-        物资种类：${types}种 / 总件数：${total}<br>
-        松弛感：Lv${cl}<br>
-        恐慌指数：${s.panic}
+        生存天数：${survived} / 30天<br>
+        HP：${Math.max(0,s.hp)}%<br>
+        同伴：${compCount}人 ${s.companions.map(id=>{const c=this.COMPANIONS.find(x=>x.id===id);if(!c)return'';const b=s.companionBond[id]||0;const bn=['陌生','信任','羁绊','共生'];return c.icon+(c.code?`${c.code}`:c.name)+(c.rarity==='SSR'?`(♥${bn[b]})`:'')+' ';}).join('')}<br>
+        剩余食物：${s.foodPool} | 水：${s.waterPool}<br>
+        防御力：${s.defense}<br>
+        爽度累计：${s.euphCurrency}<br>
+        暴露度：${s.exposure}%
       </div>
       <button class="restart-btn" onclick="G.init()">再来一轮</button></div>`;
     setTimeout(() => document.getElementById('endScreen').classList.add('show'), 300);
+  },
+
+  // ========================================
+  // PHASE 2: SURVIVAL SYSTEMS
+  // ========================================
+
+  showPhase2Transition() {
+    const s = this.s;
+    const temp = '-' + (47 + Math.floor(Math.random()*20)) + '°C';
+    document.getElementById('p2Sub').innerHTML = `地表温度: ${temp}<br>避难所: Lv${s.baseLv} ${this.BASE_TIERS[s.baseLv].name}<br>同伴: 仅你一人`;
+    document.getElementById('phase2Transition').classList.add('show');
+    SFX.play('alert');
+  },
+
+  enterPhase2() {
+    document.getElementById('phase2Transition').classList.remove('show');
+    const s = this.s;
+    s.phase = 2;
+    s.p2day = 0; s.exposure = 0; s.hp = 100;
+    s.companions = []; s.companionBond = {}; s.chatLog = []; s.starveDays = 0;
+    s.bonusEuphPerDay = 0; s.usedEvents = []; s.eventCooldowns = {};
+    s.pendingEvent = null; s.p2app = 'swipe';
+
+    // Convert stock to resource pools
+    s.foodPool = (s.stock.rice||0)*10 + (s.stock.hotpot||0)*5 + (s.stock.choco||0)*3 +
+                 (s.stock.coffee||0)*3 + (s.stock.meat||0)*8;
+    s.waterPool = (s.stock.water||0)*10;
+    s.medPool = (s.stock.med||0)*5;
+    s.hasPower = (s.stock.generator||0) > 0;
+    s.hasGreenhouse = (s.stock.greenhouse||0) > 0;
+
+    // Defense from Phase 1
+    s.defense = s.baseLv * 15 + (s.stock.door||0) * 25 + (s.stock.generator||0) * 10;
+
+    // Daily euphoria production from luxury items
+    s.euphProd = 0;
+    if (s.hasPower) {
+      s.euphProd += (s.stock.cinema||0)*10 + (s.stock.ps5||0)*5 +
+                    (s.stock.bathtub||0)*5 + (s.stock.massage||0)*4;
+    }
+    s.euphProd += (s.stock.skincare||0)*3 + (s.stock.wine||0)*4 + (s.stock.pet||0)*3;
+
+    // Carry over euphoria
+    s.euphCurrency = Math.floor(s.euphoria / 2);
+
+    // Init chat
+    this.p2Chat('📡','系统','末日降临。地表已不适合人类生存。避难所系统启动。','sys');
+    this.p2Chat('📡','系统',`食物储备: ${s.foodPool} | 水: ${s.waterPool} | 医疗: ${s.medPool}`,'sys');
+    this.p2Chat('📡','系统','保持警惕。外面的人会找上门来。','sys');
+
+    // Update UI
+    document.getElementById('exposureWrap').classList.add('show');
+    document.getElementById('appBar').classList.add('four-col');
+    document.querySelector('.topbar .title').textContent = 'SURVIVAL';
+    document.getElementById('storyPane').innerHTML = '';
+    this.s.logs = [];
+    this.log('🔴 末日降临。避难所已启动。');
+
+    this.render();
+    this.startClock();
+  },
+
+  // ===== DAILY PROCESSING =====
+  p2ProcessDay() {
+    const s = this.s;
+    if (s.done) return;
+
+    // 1. Consumption
+    const people = 1 + s.companions.length;
+    let foodSave = 0;
+    s.companions.forEach(cid => {
+      const c = this.COMPANIONS.find(x => x.id === cid);
+      if (c && c.passive.foodSave) foodSave += c.passive.foodSave;
+    });
+    const foodNeed = Math.max(1, Math.round(people * (1 - Math.min(0.5, foodSave))));
+    const waterNeed = people;
+
+    if (s.hasGreenhouse && s.hasPower) s.foodPool += 2;
+
+    s.foodPool = Math.max(0, s.foodPool - foodNeed);
+    s.waterPool = Math.max(0, s.waterPool - waterNeed);
+
+    // Starvation
+    if (s.foodPool <= 0 || s.waterPool <= 0) {
+      s.starveDays++;
+      const dmg = 15 * s.starveDays;
+      s.hp -= dmg;
+      const what = s.foodPool<=0&&s.waterPool<=0?'食物和水':s.foodPool<=0?'食物':'水';
+      this.log(`⚠️ ${what}耗尽！HP-${dmg} (连续${s.starveDays}天)`);
+      this.notif(`⚠️ ${what}耗尽！HP:${s.hp}`,'danger');
+    } else { s.starveDays = 0; }
+
+    if (s.hp <= 0) { s.done=true; this.pauseGame(); this.endGame(); return; }
+
+    // 1.5 Process debuffs
+    if (s.defDebuffDays > 0) { s.defDebuffDays--; if (s.defDebuffDays === 0) this.log('🔧 防御系统恢复正常。'); }
+    Object.keys(s.companionDebuffs).forEach(cid => {
+      if (s.companionDebuffs[cid] > 0) {
+        s.companionDebuffs[cid]--;
+        if (s.companionDebuffs[cid] === 0) {
+          const c = this.COMPANIONS.find(x=>x.id===cid);
+          if (c) this.log(`✅ ${c.code||c.name} 恢复正常状态。`);
+        }
+      }
+    });
+
+    // 2. Euphoria production
+    let dailyEuph = s.euphProd + s.bonusEuphPerDay;
+    s.companions.forEach(cid => {
+      const c = this.COMPANIONS.find(x => x.id === cid);
+      if (c && c.passive.euphPerDay && !s.companionDebuffs[cid]) dailyEuph += c.passive.euphPerDay;
+    });
+    s.euphCurrency += dailyEuph;
+
+    // 3. Exposure decay
+    let decay = 1;
+    s.companions.forEach(cid => {
+      const c = this.COMPANIONS.find(x => x.id === cid);
+      if (c && c.passive.exposureDecay) decay += c.passive.exposureDecay;
+    });
+    s.exposure = Math.max(0, s.exposure - decay);
+
+    // 3.5 SSR Special: 月狩 daily scavenging
+    if (s.companions.includes('hunter')) {
+      const scavFood = 2 + Math.floor(Math.random()*4);
+      const scavWater = 1 + Math.floor(Math.random()*3);
+      s.foodPool += scavFood;
+      s.waterPool += scavWater;
+      if (Math.random() < 0.25) {
+        const special = ['防弹衣碎片','医疗箱','信号弹','军用罐头'][Math.floor(Math.random()*4)];
+        if (special === '防弹衣碎片') s.defense += 3;
+        else if (special === '医疗箱') s.medPool += 2;
+        else if (special === '信号弹') s.exposure = Math.max(0, s.exposure - 5);
+        else s.foodPool += 5;
+        this.p2Chat('🏹','楚狄',`出去转了一圈。带回来${special}。别问怎么搞的。`);
+      }
+      this.log(`🏹 月狩狩猎：食物+${scavFood} 水+${scavWater}`);
+    }
+
+    // 3.6 SSR Special: 冥种 dark nutrient (bond-based food bonus)
+    if (s.companions.includes('seed')) {
+      const seedBond = s.companionBond.seed || 0;
+      const nutrientBonus = 1 + seedBond;
+      s.foodPool += nutrientBonus;
+      if (seedBond >= 2 && Math.random() < 0.3) {
+        s.hp = Math.min(100, s.hp + 3);
+        this.p2Chat('🌺','黎冥','今天的营养液加了新配方哦。喝完会觉得很舒服的。');
+      }
+    }
+
+    // 4. Companion chat (bond-aware)
+    if (s.companions.length > 0 && Math.random() < 0.35) {
+      const cid = s.companions[Math.floor(Math.random()*s.companions.length)];
+      const comp = this.COMPANIONS.find(x => x.id === cid);
+      if (comp) {
+        const bond = s.companionBond[cid] || 0;
+        let line;
+        if (comp.bondLines && comp.bondLines[bond] && Math.random() < 0.4) {
+          line = comp.bondLines[bond][Math.floor(Math.random()*comp.bondLines[bond].length)];
+        } else {
+          line = comp.chatLines[Math.floor(Math.random()*comp.chatLines.length)];
+        }
+        this.p2Chat(comp.icon, comp.name, line);
+      }
+    }
+
+    // 4.5 Bond natural progression (slow daily growth for SSR companions)
+    s.companions.forEach(cid => {
+      const comp = this.COMPANIONS.find(x => x.id === cid);
+      if (comp && comp.rarity === 'SSR' && comp.bondLines) {
+        const currentBond = s.companionBond[cid] || 0;
+        if (currentBond < 3 && Math.random() < 0.08) {
+          s.companionBond[cid] = currentBond + 1;
+          const newBond = s.companionBond[cid];
+          this.notif(`💕 ${comp.code||comp.name} 羁绊 → Lv${newBond}`,'success');
+          if (comp.bondLines[newBond]) {
+            const line = comp.bondLines[newBond][0];
+            setTimeout(() => this.p2Chat(comp.icon, comp.name, line), 300);
+          }
+        }
+      }
+    });
+
+    // 5. Raid check (夜鸮 auto-block minor raids)
+    const hasOwl = s.companions.includes('owl');
+    if (s.exposure >= 80) {
+      this.p2TriggerRaid('major'); return;
+    } else if (s.exposure >= 50 && Math.random() < 0.3) {
+      this.p2TriggerRaid('medium'); return;
+    } else if (s.exposure >= 30 && Math.random() < 0.15) {
+      if (hasOwl) {
+        this.log('🦉 夜鸮自动拦截了低级暴徒袭击！');
+        this.p2Chat('🦉','宁鸮','检测到低级扫描。已反制。继续工作。');
+        s.exposure = Math.max(0, s.exposure - 5);
+      } else {
+        this.p2TriggerRaid('minor'); return;
+      }
+    }
+
+    // 6. Event check
+    const evt = this.p2SelectEvent();
+    if (evt) {
+      s.pendingEvent = evt;
+      if (evt.once) s.usedEvents.push(evt.id);
+      if (evt.cooldown) s.eventCooldowns[evt.id] = s.p2day;
+      this.pauseGame();
+      SFX.play('alert');
+    }
+
+    // 7. Win check
+    if (s.p2day >= 30) { s.done=true; this.pauseGame(); this.endGame(); return; }
+
+    // 8. Log & render
+    this.log(`📅 第${s.p2day}天 | 🍚${s.foodPool} 💧${s.waterPool} | 暴露${s.exposure}%`);
+    this.render();
+  },
+
+  p2SelectEvent() {
+    const s = this.s;
+    const available = this.P2_EVENTS.filter(e => {
+      if (s.p2day < e.day[0] || s.p2day > e.day[1]) return false;
+      if (e.once && s.usedEvents.includes(e.id)) return false;
+      if (!e.once && e.cooldown && (s.p2day - (s.eventCooldowns[e.id]||0)) < e.cooldown) return false;
+      if (e.companionId && s.companions.includes(e.companionId)) return false;
+      if (e.requiresCompanion && !s.companions.includes(e.requiresCompanion)) return false;
+      if (e.left && e.left.requireCompanion && s.companions.length === 0) return false;
+      return true;
+    });
+    if (available.length === 0) return null;
+    // Prioritize bond > bond_event > trap > random > resource > threat
+    const order = {bond:0,bond_event:1,trap:2,emotional:3,random:4,resource:5,threat:6};
+    available.sort((a,b) => (order[a.type]||9) - (order[b.type]||9));
+    // Take top priority, with some randomness among same tier
+    const topType = available[0].type;
+    const sameType = available.filter(e => e.type === topType);
+    return sameType[Math.floor(Math.random()*sameType.length)];
+  },
+
+  // ===== SWIPE RESOLUTION =====
+  p2Swipe(dir) {
+    const s = this.s;
+    const evt = s.pendingEvent;
+    if (!evt) return;
+
+    this.p2Chat('🫣','你', dir==='left' ? '← '+evt.left.label : evt.right.label+' →');
+
+    if (dir === 'left') {
+      const l = evt.left;
+      const costs = l.cost || {};
+      // Check resources
+      if ((costs.food||0)>s.foodPool || (costs.water||0)>s.waterPool || (costs.med||0)>s.medPool) {
+        SFX.play('error'); this.notif('❌ 资源不足！','danger'); return;
+      }
+      SFX.play('buy');
+      s.foodPool -= (costs.food||0);
+      s.waterPool -= (costs.water||0);
+      s.medPool -= (costs.med||0);
+
+      // Trap check
+      if (l.trapChance && Math.random() < l.trapChance) {
+        const owlSlow1 = s.companions.includes('owl') ? 0.5 : 1;
+        s.exposure = Math.min(100, s.exposure + Math.round((l.trapExposure||0)*owlSlow1));
+        if (l.trapDefCheck) {
+          const atk = 20 + Math.floor(Math.random()*15);
+          if (s.defense >= atk) {
+            this.log(`⚠️ ${l.trapText} 但防御成功拦截！`);
+            this.notif('🛡️ 防御成功！','success');
+          } else {
+            const loss = 5 + Math.floor(Math.random()*10);
+            s.foodPool = Math.max(0, s.foodPool-loss);
+            s.waterPool = Math.max(0, s.waterPool-loss);
+            this.log(`💀 ${l.trapText} 损失物资！`);
+            this.notif('💀 被抢劫了！','danger');
+          }
+        } else {
+          this.log(`⚠️ ${l.trapText}`);
+          this.notif('⚠️ 上当了！暴露度+' + (l.trapExposure||0),'danger');
+        }
+        this.p2Chat('⚠️','系统', l.trapText, 'sys');
+      } else {
+        // Safe / success
+        this.log(`✓ ${l.safeText || l.text}`);
+
+        // Random outcomes
+        if (l.randomOutcomes) {
+          let roll = Math.random(), cumul = 0;
+          for (const o of l.randomOutcomes) {
+            cumul += o.chance;
+            if (roll <= cumul) {
+              this.log(`🎲 ${o.text}`);
+              this.notif(o.text,'success');
+              if (o.reward) this.p2ApplyReward(o.reward);
+              this.p2Chat('📦','系统', o.text);
+              break;
+            }
+          }
+        }
+
+        // Companion recruitment
+        if (evt.companionId && !s.companions.includes(evt.companionId)) {
+          s.companions.push(evt.companionId);
+          s.companionBond[evt.companionId] = 0;
+          const comp = this.COMPANIONS.find(c => c.id === evt.companionId);
+          if (comp) {
+            const codeStr = comp.code ? `「${comp.code}」` : '';
+            this.notif(`🎉 ${codeStr}${comp.name}(${comp.title}) 加入！`,'success');
+            this.log(`👤 ${comp.icon} ${codeStr}${comp.name}【${comp.rarity}】加入避难所`);
+            if (comp.passive.defense) s.defense += comp.passive.defense;
+            if (comp.passive.defBonus) s.defense += comp.passive.defBonus;
+            if (comp.passive.greenhouse) { s.hasGreenhouse = true; this.log('🌱 地下水培农场已解锁！'); }
+            if (comp.chatIntro) setTimeout(() => this.p2Chat(comp.icon, comp.name, comp.chatIntro), 500);
+          }
+        }
+        // Bond deepening events
+        if (evt.type === 'bond_event' && evt.requiresCompanion) {
+          const cid = evt.requiresCompanion;
+          s.companionBond[cid] = Math.min(3, (s.companionBond[cid]||0) + 1);
+          const comp = this.COMPANIONS.find(c => c.id === cid);
+          if (comp) {
+            const bl = s.companionBond[cid];
+            this.notif(`💕 ${comp.code||comp.name} 羁绊等级 → Lv${bl}`,'success');
+            this.log(`💕 ${comp.icon} ${comp.code||comp.name} 羁绊深化 → Lv${bl}`);
+            if (comp.bondLines && comp.bondLines[bl]) {
+              const line = comp.bondLines[bl][Math.floor(Math.random()*comp.bondLines[bl].length)];
+              setTimeout(() => this.p2Chat(comp.icon, comp.name, line), 800);
+            }
+          }
+        }
+
+        // Event bonuses
+        if (l.defBonus) s.defense += l.defBonus;
+        if (l.euphPerDay) s.bonusEuphPerDay += l.euphPerDay;
+        if (l.exposureReduce) s.exposure = Math.max(0, s.exposure - l.exposureReduce);
+        if (l.safeReward) this.p2ApplyReward(l.safeReward);
+        if (l.safeEuph) s.euphCurrency += l.safeEuph;
+        if (l.reward) this.p2ApplyReward(l.reward);
+      }
+    } else {
+      // Right swipe
+      SFX.play('cash');
+      const r = evt.right;
+      const hunterBonus = s.companions.includes('hunter') ? 2 : 1;
+      if (r.euph) s.euphCurrency += r.euph * hunterBonus;
+      const owlSlow2 = s.companions.includes('owl') ? 0.5 : 1;
+      const tacWarn = s.tacticalWarning ? 0.5 : 1;
+      s.exposure = Math.min(100, s.exposure + Math.round((r.exposure||0)*owlSlow2*tacWarn));
+      if (r.penalty) {
+        if (r.penalty.med) s.medPool = Math.max(0, s.medPool - r.penalty.med);
+        if (r.penalty.food) s.foodPool = Math.max(0, s.foodPool - r.penalty.food);
+      }
+      this.log(`→ ${r.text}`);
+      this.p2Chat('📡','系统', r.text);
+    }
+
+    s.pendingEvent = null;
+    this.resumeGame();
+    this.render();
+  },
+
+  p2ApplyReward(rw) {
+    const s = this.s;
+    if (rw.food) s.foodPool += rw.food;
+    if (rw.water) s.waterPool += rw.water;
+    if (rw.med) s.medPool += rw.med;
+    if (rw.defense) s.defense += rw.defense;
+    if (rw.euph) s.euphCurrency += rw.euph;
+  },
+
+  // ===== RAID SYSTEM =====
+  p2TriggerRaid(level) {
+    this.pauseGame();
+    SFX.play('alert');
+    const s = this.s;
+    const str = {minor:[15,25],medium:[30,50],major:[55,80]};
+    const names = {minor:'小股暴徒',medium:'武装团伙',major:'重火力攻城'};
+    const [lo,hi] = str[level];
+    const atk = lo + Math.floor(Math.random()*(hi-lo));
+    const def = s.defDebuffDays > 0 ? Math.floor(s.defense * 0.7) : s.defense;
+    const win = def >= atk;
+    const catastrophe = !win && def < atk * 0.5;
+
+    let resultHtml, cls;
+    if (win) {
+      const loot = 5 + Math.floor(Math.random()*10);
+      s.foodPool += loot;
+      s.exposure = Math.max(0, s.exposure - 20);
+      resultHtml = `防御成功！缴获食物+${loot}<br>暴露度-20`; cls='win';
+      this.log(`🛡️ 击退${names[level]}！防御${def} vs 攻击${atk}`);
+    } else if (catastrophe) {
+      s.hp -= 50;
+      s.foodPool = Math.max(0, Math.floor(s.foodPool*0.5));
+      s.waterPool = Math.max(0, Math.floor(s.waterPool*0.5));
+      resultHtml = `防线崩溃！损失50%物资，HP-50<br>HP: ${s.hp}`; cls='lose';
+      this.log(`💀 ${names[level]}攻破防线！HP:${s.hp}`);
+      if (s.hp <= 0) s.done = true;
+    } else {
+      const fl = 5+Math.floor(Math.random()*10), wl = 3+Math.floor(Math.random()*8);
+      s.foodPool = Math.max(0, s.foodPool-fl);
+      s.waterPool = Math.max(0, s.waterPool-wl);
+      s.exposure = Math.max(0, s.exposure-10);
+      resultHtml = `勉强抵挡！食物-${fl} 水-${wl}`; cls='lose';
+      this.log(`⚔️ ${names[level]}来袭！损失物资`);
+    }
+
+    document.getElementById('raidBox').innerHTML = `
+      <h2>⚠️ ${names[level]}来袭！</h2>
+      <div class="raid-desc">攻击力: ${atk} | 你的防御: ${def}</div>
+      <div class="raid-result ${cls}">${resultHtml}</div>
+      <button class="raid-btn" onclick="G.p2CloseRaid()">继续</button>`;
+    document.getElementById('raidOverlay').classList.add('show');
+  },
+
+  p2CloseRaid() {
+    document.getElementById('raidOverlay').classList.remove('show');
+    if (this.s.done) { this.endGame(); return; }
+    this.resumeGame();
+    this.render();
+  },
+
+  // ===== CHAT =====
+  p2Chat(icon, name, text, type) {
+    this.s.chatLog.push({ icon, name, text, type:type||'normal', day:this.s.p2day });
+    if (this.s.chatLog.length > 50) this.s.chatLog.shift();
+    if (this.s.p2app === 'chat') this.p2RenderModule();
+  },
+
+  // ===== BLACK MARKET =====
+  p2BuyMarket(type) {
+    const s = this.s;
+    const items = {
+      supply: { cost:50, fn:()=>{
+        const r=Math.random();
+        if(r<0.4){s.foodPool+=10;s.waterPool+=8;this.notif('📦 食物+10 水+8','success');}
+        else if(r<0.7){s.medPool+=5;this.notif('📦 医疗+5','success');}
+        else{s.foodPool+=5;s.waterPool+=5;s.medPool+=2;this.notif('📦 混合补给','success');}
+      }},
+      defense: { cost:80, fn:()=>{s.defense+=10;this.notif('🛡️ 防御+10','success');} },
+      medkit: { cost:30, fn:()=>{s.medPool+=5;s.hp=Math.min(100,s.hp+10);this.notif('💊 医疗+5 HP+10','success');} }
+    };
+    const it = items[type];
+    if (!it || s.euphCurrency < it.cost) { SFX.play('error'); this.notif('爽度不足！','danger'); return; }
+    s.euphCurrency -= it.cost;
+    it.fn();
+    SFX.play('buy');
+    this.render();
+  },
+
+  // ===== PHASE 2 RENDERING =====
+  p2Render() {
+    this.p2RenderStatus();
+    this.p2RenderExposure();
+    this.p2RenderAppBar();
+    this.p2RenderModule();
+    this.updateWarehouseUI();
+    this.updateCountdown();
+  },
+
+  p2RenderStatus() {
+    const s = this.s;
+    const fd = s.foodPool<=10, wd = s.waterPool<=10;
+    const prod = s.euphProd + s.bonusEuphPerDay +
+      s.companions.reduce((sum,cid)=>{const c=this.COMPANIONS.find(x=>x.id===cid);return sum+(c&&c.passive.euphPerDay||0);},0);
+    document.getElementById('statusBar').innerHTML = `
+      <div class="status-item"><div class="label">🍚 食物</div><div class="value" style="color:${fd?'#ff453a':'#ff9f0a'}">${s.foodPool}</div></div>
+      <div class="status-item"><div class="label">💧 水</div><div class="value" style="color:${wd?'#ff453a':'#0a84ff'}">${s.waterPool}</div></div>
+      <div class="status-item"><div class="label">🛡️ 防御</div><div class="value" style="color:#32d74b">${s.defense}</div></div>
+      <div class="status-item"><div class="label">💜 爽度</div><div class="value" style="color:#bf5af2">${s.euphCurrency}<span style="font-size:7px;color:#666"> +${prod}/天</span></div></div>`;
+  },
+
+  p2RenderExposure() {
+    const pct = Math.min(100, this.s.exposure);
+    document.getElementById('exposureFill').style.width = pct+'%';
+    document.getElementById('exposureFill').classList.toggle('danger', pct>=60);
+    document.getElementById('exposureVal').textContent = pct+'%';
+  },
+
+  p2RenderAppBar() {
+    const s = this.s;
+    const apps = [{id:'swipe',name:'事件',icon:'📋'},{id:'chat',name:'通讯',icon:'💬'},{id:'companion',name:'同伴',icon:'👥'},{id:'market',name:'黑市',icon:'🏪'}];
+    document.getElementById('appBar').innerHTML = apps.map(a =>
+      `<button class="app-btn ${s.p2app===a.id?'active':''}" onclick="G.p2SwitchApp('${a.id}')">
+        <div class="icon">${a.icon}</div><div class="name">${a.name}</div></button>`
+    ).join('');
+  },
+
+  p2SwitchApp(id) {
+    this.s.p2app = id;
+    this.p2RenderAppBar();
+    this.p2RenderModule();
+  },
+
+  p2RenderModule() {
+    const panel = document.getElementById('modulePanel');
+    switch(this.s.p2app) {
+      case 'swipe': this.p2RenderSwipe(panel); break;
+      case 'chat': this.p2RenderChat(panel); break;
+      case 'companion': this.p2RenderCompanions(panel); break;
+      case 'market': this.p2RenderMarket(panel); break;
+    }
+  },
+
+  p2RenderSwipe(panel) {
+    const s = this.s;
+    if (!s.pendingEvent) {
+      panel.innerHTML = `<div class="no-event"><div class="big-icon">📡</div>
+        <div>等待信号中……</div>
+        <div style="margin-top:8px;font-size:11px;color:#444">外面很安静。检查物资和同伴吧。</div>
+        <div style="margin-top:12px;font-size:10px;color:#333">第${s.p2day}天 / 30天</div></div>`;
+      return;
+    }
+    const evt = s.pendingEvent;
+    const icons = {food:'🍚',water:'💧',med:'💊'};
+    const costStr = Object.entries(evt.left.cost||{}).map(([k,v])=>
+      `<span>${icons[k]||k} -${v}</span>`).join('') || '<span>免费</span>';
+
+    panel.innerHTML = `
+      <div class="swipe-area" id="swipeArea">
+        <div class="swipe-card" id="swipeCard">
+          <span class="swipe-label lbl-left">接纳</span>
+          <span class="swipe-label lbl-right">拒绝</span>
+          <div class="card-avatar">${evt.avatar}</div>
+          <div class="card-title">${evt.title}</div>
+          <div class="card-desc">${evt.desc}</div>
+          <div class="card-costs">${costStr}</div>
+          <div class="card-hint">
+            <span class="h-left">← ${evt.left.label}</span>
+            <span class="h-right">${evt.right.label} →</span>
+          </div>
+        </div>
+      </div>
+      <div class="swipe-btns">
+        <button class="swipe-btn accept" onclick="G.p2Swipe('left')">← ${evt.left.label}</button>
+        <button class="swipe-btn reject" onclick="G.p2Swipe('right')">${evt.right.label} →</button>
+      </div>`;
+    setTimeout(() => this.p2InitSwipeTouch(), 50);
+  },
+
+  p2InitSwipeTouch() {
+    const card = document.getElementById('swipeCard');
+    if (!card || card.dataset.init) return;
+    card.dataset.init = '1';
+    let sx=0,dx=0,drag=false;
+    const onS = x=>{sx=x;drag=true;card.classList.add('dragging');};
+    const onM = x=>{
+      if(!drag)return; dx=x-sx;
+      card.style.transform=`translateX(${dx}px) rotate(${dx*0.08}deg)`;
+      card.classList.toggle('swiping-left',dx<-30);
+      card.classList.toggle('swiping-right',dx>30);
+    };
+    const onE = ()=>{
+      if(!drag)return; drag=false; card.classList.remove('dragging');
+      if(dx<-80) this.p2Swipe('left');
+      else if(dx>80) this.p2Swipe('right');
+      else{card.style.transform='';card.classList.remove('swiping-left','swiping-right');}
+      dx=0;
+    };
+    card.addEventListener('touchstart',e=>onS(e.touches[0].clientX),{passive:true});
+    card.addEventListener('touchmove',e=>{e.preventDefault();onM(e.touches[0].clientX);},{passive:false});
+    card.addEventListener('touchend',onE);
+    card.addEventListener('mousedown',e=>{
+      onS(e.clientX);
+      const mm=ev=>onM(ev.clientX);
+      const mu=()=>{onE();document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);};
+      document.addEventListener('mousemove',mm);
+      document.addEventListener('mouseup',mu);
+    });
+  },
+
+  p2RenderChat(panel) {
+    let html = '<div class="m-header"><span>💬 加密通讯录</span><span style="color:#555;font-size:10px">群聊</span></div><div class="chat-wrap">';
+    this.s.chatLog.forEach(m => {
+      html += `<div class="chat-msg ${m.type==='sys'?'sys':''}">
+        <div class="c-avatar">${m.icon}</div>
+        <div class="c-bubble"><div class="c-name">${m.name} · 第${m.day}天</div><div class="c-text">${m.text}</div></div></div>`;
+    });
+    if (this.s.chatLog.length===0) html += '<div style="text-align:center;color:#444;padding:20px">暂无消息</div>';
+    html += '</div>';
+    panel.innerHTML = html;
+    panel.scrollTop = panel.scrollHeight;
+  },
+
+  p2RenderCompanions(panel) {
+    const s = this.s;
+    let html = `<div class="m-header"><span>👥 同伴 (${s.companions.length})</span><span style="color:${s.hp<=30?'#ff453a':'#555'};font-size:10px">HP: ${s.hp}%</span></div>`;
+    if (s.companions.length===0) {
+      html += '<div style="text-align:center;color:#444;padding:20px;font-size:12px">暂无同伴。在事件中选择接纳可能遇到同伴。</div>';
+    }
+    s.companions.forEach(cid => {
+      const c = this.COMPANIONS.find(x=>x.id===cid);
+      if (!c) return;
+      const bond = s.companionBond[cid] || 0;
+      const bondNames = ['陌生','信任','羁绊','共生'];
+      const bondColors = ['#666','#0a84ff','#bf5af2','#ff2d55'];
+      const eff = [];
+      if (c.passive.defense) eff.push(`防御+${c.passive.defense}`);
+      if (c.passive.defBonus) eff.push(`防御加成+${c.passive.defBonus}`);
+      if (c.passive.foodSave) eff.push(`省粮${Math.round(c.passive.foodSave*100)}%`);
+      if (c.passive.exposureDecay) eff.push(`暴露衰减+${c.passive.exposureDecay}`);
+      if (c.passive.euphPerDay) eff.push(`爽度+${c.passive.euphPerDay}/天`);
+      // SSR special abilities
+      if (c.passive.exposureSlowdown) eff.push(`暴露增速-${Math.round(c.passive.exposureSlowdown*100)}%`);
+      if (c.passive.autoBlockRaid) eff.push('自动拦截低级袭击');
+      if (c.passive.dailyScavenge) eff.push('每日狩猎带回物资');
+      if (c.passive.rightSwipeBonus) eff.push(`右滑爽度×${c.passive.rightSwipeBonus}`);
+      if (c.passive.greenhouse) eff.push('解锁水培农场');
+      if (c.passive.darkNutrient) eff.push('营养液回复HP');
+
+      const isSSR = c.rarity === 'SSR';
+      const codeStr = c.code ? `「${c.code}」` : '';
+      const bondBar = isSSR ? `<div class="bond-wrap"><div class="bond-label" style="color:${bondColors[bond]}">♥ ${bondNames[bond]} Lv${bond}</div><div class="bond-bar"><div class="bond-fill" style="width:${bond*33.3}%;background:${bondColors[bond]}"></div></div></div>` : '';
+      const hookStr = c.hook && bond >= 1 ? `<div class="comp-hook">${c.hook}</div>` : '';
+
+      html += `<div class="comp-card ${isSSR?'ssr':''}"><div class="comp-av">${c.icon}</div>
+        <div class="comp-info">
+          <div class="comp-name">${codeStr}${c.name} <span class="comp-rarity ${c.rarity}">${c.rarity}</span></div>
+          <div class="comp-title">${c.title}</div>
+          ${bondBar}
+          <div class="comp-eff">${eff.join(' | ')}</div>
+          ${hookStr}
+        </div></div>`;
+    });
+    const unr = this.COMPANIONS.filter(c=>!s.companions.includes(c.id));
+    if (unr.length>0) {
+      html += '<div style="margin-top:12px;color:#444;font-size:10px;text-align:center">— 未发现 —</div>';
+      unr.forEach(c => {
+        const isSSR = c.rarity === 'SSR';
+        html += `<div class="comp-card mystery ${isSSR?'ssr-mystery':''}">
+          <div class="comp-av" style="filter:brightness(0.3)">${c.icon}</div>
+          <div class="comp-info"><div class="comp-name" style="color:#333">??? <span class="comp-rarity ${c.rarity}" style="opacity:0.3">${c.rarity}</span></div>
+          <div class="comp-title" style="color:#222">???</div></div></div>`;
+      });
+    }
+    panel.innerHTML = html;
+  },
+
+  p2RenderMarket(panel) {
+    const s = this.s;
+    const items = [
+      {id:'supply',name:'🎲 盲盒补给',desc:'随机获得食物/水/医疗',cost:50},
+      {id:'defense',name:'🛡️ 加固防御',desc:'防御力 +10',cost:80},
+      {id:'medkit',name:'💊 急救药包',desc:'医疗 +5，HP +10',cost:30}
+    ];
+    let html = `<div class="m-header"><span>🏪 黑市</span><span style="color:#bf5af2;font-size:10px">爽度: ${s.euphCurrency}</span></div>`;
+    items.forEach(it => {
+      const ok = s.euphCurrency>=it.cost;
+      html += `<div class="mkt-item ${ok?'':'disabled'}" onclick="G.p2BuyMarket('${it.id}')">
+        <div class="mkt-name">${it.name}</div><div class="mkt-desc">${it.desc}</div>
+        <div class="mkt-cost">💜 ${it.cost} 爽度</div></div>`;
+    });
+    html += '<div style="margin-top:10px;color:#333;font-size:9px;text-align:center">爽度由奢侈品每日产出 + 右滑获得</div>';
+    panel.innerHTML = html;
   },
 
   reset() {
@@ -1079,5 +2091,4 @@ const G = {
 window.addEventListener('DOMContentLoaded', () => G.init());
 </script>
 </body>
-</html>
 </html>
