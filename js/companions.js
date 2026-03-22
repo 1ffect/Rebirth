@@ -113,13 +113,16 @@ const CS = {
   calcFoodNeed(s) {
     const people = 1 + s.companions.length;
     const passives = this.getActivePassives(s);
-    return Math.max(1, Math.round(people * 1.0 * (1 - Math.min(0.4, passives.foodSave))));
+    // Late game cold escalation: day 35+ extra consumption
+    const coldExtra = s.p2day >= 50 ? 3 : s.p2day >= 35 ? 2 : s.p2day >= 20 ? 1 : 0;
+    return Math.max(2, Math.round(people * 1.5 * (1 - Math.min(0.4, passives.foodSave)))) + coldExtra;
   },
 
   calcWaterNeed(s) {
     const people = 1 + s.companions.length;
     const passives = this.getActivePassives(s);
-    return Math.max(1, Math.round(people * 1.0 * (1 - Math.min(0.4, passives.waterSave))));
+    const coldExtra = s.p2day >= 50 ? 2 : s.p2day >= 35 ? 1 : 0;
+    return Math.max(2, Math.round(people * 1.2 * (1 - Math.min(0.4, passives.waterSave)))) + coldExtra;
   },
 
   getExposureMultiplier(s) {

@@ -2,10 +2,10 @@
 // GAME ENGINE — CORE (Phase 1)
 // ========================================
 const G = {
-  // 3 seconds per game-day (each tick = 4 hours, 6 ticks/day, 500ms/tick)
-  // Phase 2 = 60 days = ~3 minutes real-time
-  // 60-second Phase 1 sprint: 30 days × 6 ticks × 330ms = 59.4s
-  TICK_MS: 330,
+  // ~4.4 seconds per game-day (each tick = 4 hours, 6 ticks/day, 440ms/tick)
+  // Phase 2 = 60 days = ~4 minutes real-time
+  // 80-second Phase 1: 30 days × 6 ticks × 440ms = 79.2s
+  TICK_MS: 440,
   HOURS_PER_TICK: 4,
   tickTimer: null,
 
@@ -102,7 +102,7 @@ const G = {
       this.render();
       this.startClock();
       this.log('🔴 系统激活。身无分文，100m³地下室。');
-      this.log('💳 狂点【主权信用卡】！每次+3万，攒够20万升级空间！');
+      this.log('💳 狂点【主权信用卡】！每次+5万，攒够20万升级空间！');
       setTimeout(() => this.tutorialStep1(), 500);
     }, 800);
   },
@@ -113,7 +113,7 @@ const G = {
     this.s.tutorialStep = 1;
     const btn = document.querySelector('.app-btn[data-app="finance"]');
     if (btn) btn.classList.add('tutorial-highlight');
-    this.showTip('狂点【主权信用卡】！每次+3万 👆');
+    this.showTip('狂点【主权信用卡】！每次+5万 👆');
   },
   tutorialStep2() {
     if (this.s.tutorialStep !== 1) return;

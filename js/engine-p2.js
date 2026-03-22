@@ -10,7 +10,14 @@ Object.assign(G, {
   showPhase2Transition() {
     const s = this.s;
     const temp = '-' + (47 + Math.floor(Math.random()*20)) + '°C';
-    document.getElementById('p2Sub').innerHTML = `地表温度: ${temp}<br>避难所: Lv${s.baseLv} ${this.BASE_TIERS[s.baseLv].name}<br>同伴: 仅你一人`;
+    // Preview converted resources
+    const preFood = (s.stock.rice||0)*3 + (s.stock.hotpot||0)*2 + (s.stock.choco||0)*1 +
+                    (s.stock.coffee||0)*1 + (s.stock.meat||0)*2;
+    const preWater = (s.stock.water||0)*4 + (s.stock.bathtub||0)*1 + (s.stock.coffee||0)*1;
+    const hasPow = (s.stock.generator||0) > 0;
+    const foodWarn = preFood < 120 ? ' ⚠️' : preFood < 200 ? ' ⚡' : ' ✓';
+    const waterWarn = preWater < 100 ? ' ⚠️' : preWater < 160 ? ' ⚡' : ' ✓';
+    document.getElementById('p2Sub').innerHTML = `地表温度: ${temp}<br>避难所: Lv${s.baseLv} ${this.BASE_TIERS[s.baseLv].name}<br>食物储备: ${preFood}${foodWarn} | 水: ${preWater}${waterWarn}<br>${hasPow?'⚡ 发电机: 已装备':'🥶 发电机: <span style="color:#ff453a">无！将持续冻伤</span>'}`;
     document.getElementById('phase2Transition').classList.add('show');
     SFX.play('alert');
   },
@@ -29,19 +36,19 @@ Object.assign(G, {
     if (s.flags.heavy_debt) s.p2Flags.push('heavy_debt');
     if (s.flags.extreme_debt) s.p2Flags.push('extreme_debt');
 
-    // Convert stock to resource pools (balanced for 60-day survival)
-    s.foodPool = (s.stock.rice||0)*8 + (s.stock.hotpot||0)*4 + (s.stock.choco||0)*2 +
-                 (s.stock.coffee||0)*2 + (s.stock.meat||0)*6;
-    s.waterPool = (s.stock.water||0)*10 + (s.stock.bathtub||0)*3 + (s.stock.coffee||0)*1;
-    s.medPool = (s.stock.med||0)*4;
+    // Convert stock to resource pools (tight budget — every unit matters)
+    s.foodPool = (s.stock.rice||0)*3 + (s.stock.hotpot||0)*2 + (s.stock.choco||0)*1 +
+                 (s.stock.coffee||0)*1 + (s.stock.meat||0)*2;
+    s.waterPool = (s.stock.water||0)*4 + (s.stock.bathtub||0)*1 + (s.stock.coffee||0)*1;
+    s.medPool = (s.stock.med||0)*2;
     if (META.has('medreserve')) s.medPool += 10;
     // Apply repeatable meta bonuses
     const repFood = META.getRepeatLv('rep_food');
     const repWater = META.getRepeatLv('rep_water');
     const repDef = META.getRepeatLv('rep_def');
     const repEuph = META.getRepeatLv('rep_euph');
-    if (repFood > 0) s.foodPool += repFood * 8;
-    if (repWater > 0) s.waterPool += repWater * 6;
+    if (repFood > 0) s.foodPool += repFood * 4;
+    if (repWater > 0) s.waterPool += repWater * 3;
 
     s.hasPower = (s.stock.generator||0) > 0;
     s.hasGreenhouse = (s.stock.greenhouse||0) > 0;
@@ -97,21 +104,24 @@ Object.assign(G, {
         title: '📡 避难所生存指南',
         body: `<div style="text-align:left;line-height:1.8;font-size:12px;color:#aaa">
           <div style="color:#ff453a;font-weight:700;margin-bottom:6px">▎核心目标：活过60天</div>
-          <div><span style="color:#F5F5F5">🍚 FOOD / 💧 WATER</span> — 每日消耗，归零则扣HP</div>
+          <div><span style="color:#F5F5F5">🍚 FOOD / 💧 WATER</span> — 每日消耗，归零则狂掉HP</div>
           <div><span style="color:#32d74b">🛡️ DEF</span> — 防御值，抵挡暴徒袭击</div>
-          <div><span style="color:#ff453a">🔴 暴露度</span> — 越高越容易被暴徒发现并攻击</div>
-          <div style="color:#888;font-size:11px;margin-top:6px">每天会有人来敲门——你的选择决定生死。</div>
+          <div><span style="color:#ff453a">🔴 暴露度</span> — <strong>每天自动上涨</strong>，后期涨速翻倍！≥40就会招来暴徒</div>
+          <div><span style="color:#0af">⚡ 发电机</span> — <strong>最重要的物资！</strong>没有发电机=每天冻伤掉HP，奢侈品也无法产出爽度</div>
+          <div style="color:#ff9f0a;font-size:11px;margin-top:6px;font-weight:700">⚠ 每收留一位同伴，每日食物和水的消耗都会增加！量力而行。</div>
+          <div style="color:#888;font-size:11px;margin-top:3px">后期气温骤降，消耗会加速——别以为物资够就稳了。</div>
         </div>`,
         btn: '明白了',
-        auto: 6
+        auto: 8
       },
       2: {
         title: '🃏 事件卡片',
         body: `<div style="text-align:left;line-height:1.8;font-size:12px;color:#aaa">
           <div style="color:#CCFF00;font-weight:700;margin-bottom:6px">▎左滑接纳 / 右滑拒绝</div>
           <div><span style="color:#32d74b">← 接纳</span> — 消耗资源，但可能获得同伴、物资、防御</div>
-          <div><span style="color:#ff9f0a">→ 拒绝</span> — 免费获得<span style="color:#CCFF00">爽度</span>，但会增加暴露度</div>
+          <div><span style="color:#ff9f0a">→ 拒绝</span> — 免费获得<span style="color:#CCFF00">爽度</span>，但会<strong>增加暴露度</strong></div>
           <div style="color:#888;font-size:11px;margin-top:6px">也可以直接点底部按钮选择，不一定要滑动。</div>
+          <div style="color:#ff453a;font-size:11px;margin-top:3px">💡 暴露度只增不减？试试收留能降低暴露度的同伴！</div>
         </div>`,
         btn: '收到',
         auto: 6
@@ -174,24 +184,31 @@ Object.assign(G, {
     const s = this.s;
     if (s.done) return;
 
-    // 1. Consumption — use CS helpers
+    // 1. Consumption — use CS helpers (includes late-game cold escalation)
     const foodNeed = CS.calcFoodNeed(s);
     const waterNeed = CS.calcWaterNeed(s);
 
-    // Greenhouse: works with power (produces food + water recycling)
-    if (s.hasGreenhouse && s.hasPower) { s.foodPool += 2; s.waterPool += 2; }
+    // Greenhouse: works with power (nerfed: +1/+1)
+    if (s.hasGreenhouse && s.hasPower) { s.foodPool += 1; s.waterPool += 1; }
 
-    // Generator fuel cost: every other day
-    if (s.hasPower && s.p2day % 2 === 0 && !s.flags.nuclearBattery) s.foodPool = Math.max(0, s.foodPool - 1);
+    // Generator fuel cost: every day without nuclear battery
+    if (s.hasPower && !s.flags.nuclearBattery) s.foodPool = Math.max(0, s.foodPool - 1);
+
+    // Cold damage: no power = freezing
+    if (!s.hasPower) {
+      const coldDmg = s.p2day >= 40 ? 8 : 5;
+      s.hp -= coldDmg;
+      if (s.p2day % 5 === 1) this.log(`🥶 没有发电机！极寒侵蚀 HP-${coldDmg}`);
+    }
 
     s.foodPool = Math.max(0, s.foodPool - foodNeed);
     s.waterPool = Math.max(0, s.waterPool - waterNeed);
-    if (s.flags.usedDarkLoan) s.foodPool = Math.max(0, s.foodPool - 1);
+    if (s.flags.usedDarkLoan) s.foodPool = Math.max(0, s.foodPool - 2);
 
-    // Starvation
+    // Starvation (accelerating damage)
     if (s.foodPool <= 0 || s.waterPool <= 0) {
       s.starveDays++;
-      const dmg = 20 * s.starveDays;
+      const dmg = 15 + 10 * s.starveDays;
       s.hp -= dmg;
       const what = s.foodPool<=0&&s.waterPool<=0?'食物和水':s.foodPool<=0?'食物':'水';
       this.log(`⚠️ ${what}耗尽！HP-${dmg} (连续${s.starveDays}天)`);
@@ -200,28 +217,16 @@ Object.assign(G, {
 
     if (s.hp <= 0) { s.done=true; this.pauseGame(); this.endGame(); return; }
 
-    // 1.5 Process debuffs
-    if (s.defDebuffDays > 0) { s.defDebuffDays--; if (s.defDebuffDays === 0) this.log('🔧 防御系统恢复正常。'); }
-    Object.keys(s.companionDebuffs).forEach(cid => {
-      if (s.companionDebuffs[cid] > 0) {
-        s.companionDebuffs[cid]--;
-        if (s.companionDebuffs[cid] === 0) {
-          const c = COMPANIONS.find(x=>x.id===cid);
-          if (c) this.log(`✅ ${c.code||c.name} 恢复正常状态。`);
-        }
-      }
-    });
-
     // 2. Euphoria production — use CS helpers
     const passives = CS.getActivePassives(s);
     let dailyEuph = s.euphProd + s.bonusEuphPerDay + passives.euphPerDay;
     s.euphCurrency += dailyEuph;
 
-    // 3. Exposure: natural daily drift + decay
-    const naturalGrowth = Math.min(2, Math.floor(s.p2day / 20));
+    // 3. Exposure: accelerating natural growth — late game is dangerous
+    const naturalGrowth = 1 + Math.min(4, Math.floor(s.p2day / 12));
     s.exposure = Math.min(100, s.exposure + naturalGrowth);
 
-    let decay = 2 + passives.exposureDecay;
+    let decay = 1 + passives.exposureDecay;
     s.exposure = Math.max(0, s.exposure - decay);
 
     // 3.5 SSR Special: 月狩 daily scavenging (disabled during debuff, 35% chance)
@@ -285,8 +290,8 @@ Object.assign(G, {
       }
     });
 
-    // 5. Raid check — use CS helpers
-    if (s.exposure >= 80) {
+    // 5. Raid check — use CS helpers (lowered thresholds, higher frequency)
+    if (s.exposure >= 70) {
       if (CS.checkRaidDowngrade(s)) {
         this.log('🦉 夜鸮干扰了敌方通讯，攻势降级！');
         this.p2Chat('🦉','宁鸮','截获了他们的指挥频道，部分兵力被我调走了。');
@@ -295,11 +300,23 @@ Object.assign(G, {
         this.p2TriggerRaid('major');
       }
       return;
-    } else if (s.exposure >= 45 && Math.random() < 0.35) {
+    } else if (s.exposure >= 40 && Math.random() < 0.45) {
       this.p2TriggerRaid('medium'); return;
-    } else if (s.exposure >= 25 && Math.random() < 0.2) {
+    } else if (s.exposure >= 20 && Math.random() < 0.3) {
       this.p2TriggerRaid('minor'); return;
     }
+
+    // 5.5 Process debuffs (after raids so debuffs apply to same-day raids)
+    if (s.defDebuffDays > 0) { s.defDebuffDays--; if (s.defDebuffDays === 0) this.log('🔧 防御系统恢复正常。'); }
+    Object.keys(s.companionDebuffs).forEach(cid => {
+      if (s.companionDebuffs[cid] > 0) {
+        s.companionDebuffs[cid]--;
+        if (s.companionDebuffs[cid] === 0) {
+          const c = COMPANIONS.find(x=>x.id===cid);
+          if (c) this.log(`✅ ${c.code||c.name} 恢复正常状态。`);
+        }
+      }
+    });
 
     // 6. Event check (guarantee: force event if 2+ days without one)
     let evt = this.p2SelectEvent();
@@ -338,7 +355,12 @@ Object.assign(G, {
     // Standard win: survive 60 days
     if (s.p2day >= 60) { s.done=true; this.pauseGame(); this.endGame(); return; }
 
-    // 8. Log & render
+    // 8. Cold escalation warnings
+    if (s.p2day === 20) { this.log('🌡️ 气温骤降！食物消耗增加。'); this.notif('🌡️ 气温骤降！消耗↑','danger'); }
+    if (s.p2day === 35) { this.log('🌡️ 极寒加剧！食物和水消耗大幅增加！'); this.notif('🌡️ 极寒加剧！消耗↑↑','danger'); }
+    if (s.p2day === 50) { this.log('🌡️ 终极寒潮！物资消耗达到极限！'); this.notif('🌡️ 终极寒潮！消耗↑↑↑','danger'); }
+
+    // 9. Log & render
     this.log(`📅 第${s.p2day}天 | 🍚${s.foodPool} 💧${s.waterPool} | 暴露${s.exposure}%`);
     this.render();
   },
@@ -740,9 +762,10 @@ Object.assign(G, {
     const fd = s.foodPool<=10, wd = s.waterPool<=10;
     const passives = CS.getActivePassives(s);
     const prod = s.euphProd + s.bonusEuphPerDay + passives.euphPerDay;
+    const fNeed = CS.calcFoodNeed(s), wNeed = CS.calcWaterNeed(s);
     document.getElementById('statusBar').innerHTML = `
-      <div class="status-item"><div class="label">FOOD</div><div class="value" style="color:${fd?'#FF3B30':'#F5F5F5'}">${s.foodPool}</div></div>
-      <div class="status-item"><div class="label">WATER</div><div class="value" style="color:${wd?'#FF3B30':'#F5F5F5'}">${s.waterPool}</div></div>
+      <div class="status-item"><div class="label">FOOD</div><div class="value" style="color:${fd?'#FF3B30':'#F5F5F5'}">${s.foodPool}<span style="font-size:7px;color:#555"> -${fNeed}/d</span></div></div>
+      <div class="status-item"><div class="label">WATER</div><div class="value" style="color:${wd?'#FF3B30':'#F5F5F5'}">${s.waterPool}<span style="font-size:7px;color:#555"> -${wNeed}/d</span></div></div>
       <div class="status-item"><div class="label">DEF</div><div class="value" style="color:${s.defDebuffDays>0?'#ff9f0a':'#32d74b'}">${s.defDebuffDays>0?Math.floor(s.defense*0.7)+'⚠':s.defense}</div></div>
       <div class="status-item"><div class="label">EUPH</div><div class="value" style="color:#CCFF00">${s.euphCurrency}<span style="font-size:7px;color:#333"> +${prod}/d</span></div></div>`;
   },

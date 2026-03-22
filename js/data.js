@@ -10,7 +10,7 @@ const APPS = [
 
 // 3-tier finance: 狂点信用卡→一键网贷→核弹抵押. 每级解锁带Phase2负面Tag
 const FINANCE_BTNS = [
-  { id:'credit',   name:'主权信用卡',         icon:'💳', amount:30000,    maxUses:15, desc:'国家担保，狂点刷卡',   amountLabel:'每次 ¥3万', unlockCheck: s => true },
+  { id:'credit',   name:'主权信用卡',         icon:'💳', amount:50000,    maxUses:10, desc:'国家担保，狂点刷卡',   amountLabel:'每次 ¥5万', unlockCheck: s => true },
   { id:'loan',     name:'无视风险·极速网贷',   icon:'📱', amount:0,  maxUses:2,  desc:'秒批秒到，催收会上门', amountLabel:'额度：200万~500万', unlockCheck: s => s.finCount.credit >= 5,
     rollAmount: () => 2000000 + Math.floor(Math.random() * 3000000) },
   { id:'mortgage', name:'一键抵押全部家当',    icon:'🏠', amount:0,        maxUses:1,  desc:'房产车子期权一键清空', amountLabel:'额度：5000万~1.5亿', unlockCheck: s => s.finCount.loan >= 2 && s.day >= -15,
@@ -55,7 +55,7 @@ const ITEMS = [
 
 // INTEL: 60秒内4条精简弹窗，不打断心流
 const INTEL = [
-  { day:-28, type:'tip',      tag:'内部消息', head:'狂点信用卡！', detail:'每次+3万，点5次解锁【极速网贷】500万秒到！先把避难所升级——大米太占地方了！' },
+  { day:-28, type:'tip',      tag:'内部消息', head:'狂点信用卡！', detail:'每次+5万，点5次解锁【极速网贷】500万秒到！先把避难所升级——大米太占地方了！' },
   { day:-20, type:'breaking', tag:'重大事件', head:'全球恐慌：物价加速飙升', detail:'网贷花完别慌——花光后【一键抵押全部家当】就会亮起！一键变现5000万起！' },
   { day:-10, type:'breaking', tag:'最终手段', head:'【一键抵押】已解锁！', detail:'房产车子期权全部变现！5000万~1.5亿一键到账。末日后钱就是废纸——全梭哈！升Lv3乌托邦！' },
   { day:-5,  type:'tip',      tag:'倒计时',   head:'最后5天！终极扫货', detail:'食物/水/发电/防御/和牛/影院——有钱全砸进避难所！倒计时结束后钱=废纸！' },
@@ -95,7 +95,7 @@ const EVENTS = [
   { id:'neighbor_wholesale', name:'🏪 邻居清仓甩卖', trigger:()=>G.s.day<=-12&&!G.s.flags.neighbor_wholesale,
     desc:'楼下超市老板娘跑路前把钥匙扔给你了："随便拿，带不走的。反正明天这栋楼就没人了。"',
     choices:[
-      { txt:'搬空整个超市 (松弛+150，但要有空间)', reward:()=>{const bonus=Math.min(G.s.capacity-G.s.used,50);G.s.used+=bonus;const riceQty=Math.floor(bonus/15);G.s.stock.rice=(G.s.stock.rice||0)+riceQty;G.s.euphoria+=150;const riceItem=G.ITEMS.find(x=>x.id==='rice');if(riceItem&&riceQty>0)WH.addItem(riceItem,riceQty);G.notif('🏪 超市物资入库！','success')}},
+      { txt:'搬空整个超市 (松弛+150，但要有空间)', reward:()=>{const space=G.s.capacity-G.s.used;if(space<=0){G.s.euphoria+=50;G.notif('⚠️ 空间不足，只拿了一点','danger');return;}const bonus=Math.min(space,50);const riceQty=Math.floor(bonus/15);const actualVol=riceQty*15;G.s.used+=actualVol;G.s.stock.rice=(G.s.stock.rice||0)+riceQty;G.s.euphoria+=150;const riceItem=G.ITEMS.find(x=>x.id==='rice');if(riceItem&&riceQty>0)WH.addItem(riceItem,riceQty);G.notif('🏪 超市物资入库！','success')}},
       { txt:'只拿点零食就走', reward:()=>{G.s.stock.choco=(G.s.stock.choco||0)+3;G.s.used+=3;G.s.euphoria+=30}}
     ]},
   { id:'crypto_tip', name:'📈 币圈大佬的临终遗言', trigger:()=>G.s.day<=-8&&!G.s.flags.crypto_tip&&G.s.cash>=500000,
@@ -121,8 +121,8 @@ const META_ITEMS = [
 
 // Repeatable meta upgrades (infinite scaling)
 const META_REPEATS = [
-  { id:'rep_food',  name:'额外食物储备',  icon:'🍚', baseCost:200, costScale:100, desc:'末日降临时额外+8食物', perLv:'食物+8' },
-  { id:'rep_water', name:'额外净水储备',  icon:'💧', baseCost:200, costScale:100, desc:'末日降临时额外+6水', perLv:'水+6' },
+  { id:'rep_food',  name:'额外食物储备',  icon:'🍚', baseCost:200, costScale:100, desc:'末日降临时额外+4食物', perLv:'食物+4' },
+  { id:'rep_water', name:'额外净水储备',  icon:'💧', baseCost:200, costScale:100, desc:'末日降临时额外+3水', perLv:'水+3' },
   { id:'rep_def',   name:'强化防御装甲',  icon:'🛡️', baseCost:300, costScale:150, desc:'末日降临时额外+12防御', perLv:'防御+12' },
   { id:'rep_euph',  name:'爽度加速器',    icon:'⚡', baseCost:250, costScale:125, desc:'末日后每日额外+3爽度', perLv:'+3/天' },
 ];

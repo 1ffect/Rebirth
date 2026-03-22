@@ -320,8 +320,8 @@ Object.assign(G, {
     if (META.has('medreserve')) this.log('💉 应急医疗储备已就位。');
     // Log repeatable bonuses
     const rf = META.getRepeatLv('rep_food'), rw = META.getRepeatLv('rep_water'), rd = META.getRepeatLv('rep_def'), re = META.getRepeatLv('rep_euph');
-    if (rf>0) this.log(`🍚 食物储备 Lv${rf}：末日+${rf*8}食物`);
-    if (rw>0) this.log(`💧 净水储备 Lv${rw}：末日+${rw*6}水`);
+    if (rf>0) this.log(`🍚 食物储备 Lv${rf}：末日+${rf*4}食物`);
+    if (rw>0) this.log(`💧 净水储备 Lv${rw}：末日+${rw*3}水`);
     if (rd>0) this.log(`🛡️ 防御装甲 Lv${rd}：末日+${rd*12}防御`);
     if (re>0) this.log(`⚡ 爽度加速 Lv${re}：末日+${re*3}爽度/天`);
   },
