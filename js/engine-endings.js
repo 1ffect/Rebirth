@@ -334,24 +334,32 @@ Object.assign(G, {
   },
 
   reset() {
-    const choice = prompt('输入 1 = 重开本局（保留暗网解锁）\n输入 2 = 彻底重置（清除所有数据）');
-    if (choice === '1') {
-      document.getElementById('endScreen').classList.remove('show');
-      document.getElementById('darkMarket').classList.remove('show');
-      clearInterval(this.tickTimer);
-      this.clearSave();
-      this.init();
-    } else if (choice === '2') {
-      if (confirm('确定清除全部数据？暗网解锁、历史分数将全部归零！')) {
-        document.getElementById('endScreen').classList.remove('show');
-        document.getElementById('darkMarket').classList.remove('show');
-        clearInterval(this.tickTimer);
-        this.clearSave();
-        try { localStorage.removeItem(META.KEY); } catch(e) {}
-        META.data = META.fresh();
-        this.init();
-      }
+    this.pauseGame();
+    document.getElementById('modal').innerHTML = `
+      <h2>重新开始</h2>
+      <div class="modal-desc" style="border-left-color:#ff453a">
+        <div style="color:#aaa;font-size:12px;line-height:1.6">选择重置方式：</div>
+      </div>
+      <div class="modal-options">
+        <button class="option-btn" onclick="G.doReset('soft')" style="text-align:center">🔄 重开本局<br><span style="color:#666;font-size:11px">保留暗网解锁和历史分数</span></button>
+        <button class="option-btn" onclick="G.doReset('hard')" style="text-align:center;color:#ff453a">💀 彻底重置<br><span style="color:#666;font-size:11px">清除全部数据，回到纯新手</span></button>
+        <button class="option-btn" onclick="G.closeModal()" style="text-align:center;color:#555">取消</button>
+      </div>`;
+    document.getElementById('modalOverlay').classList.add('show');
+  },
+
+  doReset(type) {
+    if (type === 'hard') {
+      if (!confirm('确定清除全部数据？暗网解锁、历史分数将全部归零！')) return;
+      try { localStorage.removeItem(META.KEY); } catch(e) {}
+      META.data = META.fresh();
     }
+    document.getElementById('modalOverlay').classList.remove('show');
+    document.getElementById('endScreen').classList.remove('show');
+    document.getElementById('darkMarket').classList.remove('show');
+    clearInterval(this.tickTimer);
+    this.clearSave();
+    this.init();
   },
 
   // ========================================
