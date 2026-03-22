@@ -334,12 +334,23 @@ Object.assign(G, {
   },
 
   reset() {
-    if (confirm('确定重新开始？')) {
+    const choice = prompt('输入 1 = 重开本局（保留暗网解锁）\n输入 2 = 彻底重置（清除所有数据）');
+    if (choice === '1') {
       document.getElementById('endScreen').classList.remove('show');
       document.getElementById('darkMarket').classList.remove('show');
       clearInterval(this.tickTimer);
       this.clearSave();
       this.init();
+    } else if (choice === '2') {
+      if (confirm('确定清除全部数据？暗网解锁、历史分数将全部归零！')) {
+        document.getElementById('endScreen').classList.remove('show');
+        document.getElementById('darkMarket').classList.remove('show');
+        clearInterval(this.tickTimer);
+        this.clearSave();
+        try { localStorage.removeItem(META.KEY); } catch(e) {}
+        META.data = META.fresh();
+        this.init();
+      }
     }
   },
 
