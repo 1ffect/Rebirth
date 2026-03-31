@@ -26,6 +26,7 @@ const G = {
   buySpamCombo: 0,
   buySpamTs: 0,
   lootSpriteMap: null,
+  lootActiveDrops: 0,
 
   // ===== STATE =====
   newState() {
@@ -192,14 +193,20 @@ const G = {
       document.body.appendChild(overlay);
     }
     if (!overlay || this.s.phase !== 1) return;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches || (navigator.maxTouchPoints || 0) > 0;
+    // Hard cap to prevent mobile UI lockups.
+    const activeCap = isMobile ? 22 : 80;
+    if (this.lootActiveDrops > activeCap) return;
     overlay.classList.add('loot-storm-overlay');
     overlay.style.position = 'fixed';
     overlay.style.inset = '0';
     overlay.style.zIndex = '180';
     overlay.style.pointerEvents = 'none';
     overlay.style.overflow = 'hidden';
-    const base = 4 + Math.floor(Math.random() * 3);
-    const drops = Math.max(1, Math.min(24, base + Math.floor(intensity * 2.3)));
+    const base = isMobile ? 2 + Math.floor(Math.random() * 2) : 4 + Math.floor(Math.random() * 3);
+    const perIntensity = isMobile ? 1.2 : 2.3;
+    const maxDrops = isMobile ? 5 : 24;
+    const drops = Math.max(1, Math.min(maxDrops, base + Math.floor(intensity * perIntensity)));
     const targetEl = document.querySelector('.cap-bar-wrap') || document.getElementById('capFill');
     const targetRect = targetEl ? targetEl.getBoundingClientRect() : null;
     const targetX = targetRect ? targetRect.left + targetRect.width * (0.15 + Math.random() * 0.7) : window.innerWidth * 0.5;
@@ -208,7 +215,10 @@ const G = {
     for (let i = 0; i < drops; i++) {
       const d = document.createElement('div');
       d.className = 'loot-drop' + (intensity >= 4 ? ' heavy' : '');
-      const size = 30 + Math.floor(Math.random() * 18) + Math.min(14, intensity * 2);
+      const sizeBase = isMobile ? 22 : 30;
+      const sizeRand = isMobile ? 10 : 18;
+      const sizeBoost = isMobile ? 8 : 14;
+      const size = sizeBase + Math.floor(Math.random() * sizeRand) + Math.min(sizeBoost, intensity * 2);
       d.style.position = 'absolute';
       d.style.left = '0';
       d.style.top = '0';
@@ -227,13 +237,14 @@ const G = {
 
       const startX = Math.random() * window.innerWidth;
       const startY = -24 - Math.random() * 80;
-      const driftX = (Math.random() - 0.5) * 130;
+      const driftX = (Math.random() - 0.5) * (isMobile ? 90 : 130);
       const floorY = window.innerHeight * (0.72 + Math.random() * 0.22);
-      const dropMs = 420 + Math.random() * 360;
-      const holdMs = 900 + Math.random() * 850;
+      const dropMs = (isMobile ? 300 : 420) + Math.random() * (isMobile ? 220 : 360);
+      const holdMs = (isMobile ? 380 : 900) + Math.random() * (isMobile ? 320 : 850);
 
       d.style.transform = `translate(${startX}px, ${startY}px) rotate(${(Math.random() - 0.5) * 40}deg)`;
       overlay.appendChild(d);
+      this.lootActiveDrops++;
 
       requestAnimationFrame(() => {
         d.style.transition = `transform ${dropMs}ms cubic-bezier(0.12, 0.75, 0.28, 1), opacity ${dropMs}ms linear`;
@@ -248,6 +259,7 @@ const G = {
         d.style.opacity = '0';
         setTimeout(() => {
           if (d.parentNode) d.parentNode.removeChild(d);
+          this.lootActiveDrops = Math.max(0, this.lootActiveDrops - 1);
           const spark = document.createElement('div');
           spark.className = 'loot-spark';
           spark.style.left = `${tx}px`;

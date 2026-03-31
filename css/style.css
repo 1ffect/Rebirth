@@ -263,7 +263,7 @@ filter:drop-shadow(0 0 4px rgba(255,23,68,0.85))}
 .exposure-label .val{color:#FF3B30;font-weight:700}
 
 .swipe-area{display:flex;align-items:flex-start;justify-content:center;position:relative;overflow-y:auto;min-height:0;padding:6px 4px;flex:1}
-.swipe-card{width:100%;max-width:600px;background:#0a0a0a;border:1px solid #222;border-radius:2px;padding:14px;touch-action:none;user-select:none;position:relative;will-change:transform}
+.swipe-card{width:100%;max-width:600px;background:#0a0a0a;border:1px solid #222;border-radius:2px;padding:14px;touch-action:pan-y;user-select:none;position:relative;will-change:transform}
 .swipe-card.dragging{cursor:grabbing;transition:none}
 .swipe-card .card-avatar{font-size:28px;text-align:center;margin-bottom:4px}
 .npc-card{position:relative;background:#0a0a0a;border:2px solid #2a2a2a;padding:8px;margin-bottom:8px;display:flex;gap:8px;align-items:stretch;box-shadow:inset 0 0 0 1px #111}
@@ -284,6 +284,8 @@ display:flex;align-items:center;justify-content:center;font-size:32px;image-rend
 .npc-portrait.custom.linainai{background-image:url('../assets/npc-1930-linainai.png')}
 .npc-portrait.custom.mentor{background-image:url('../assets/npc-1800-mentor.png')}
 .npc-portrait.custom.colleague{background-image:url('../assets/npc-3175-colleague.png')}
+.npc-portrait.custom.exbf{background-image:url('../assets/npc-4671-exbf.png')}
+.npc-portrait.custom.influencerbeg{background-image:url('../assets/npc-9097-influencerbeg.png')}
 .npc-portrait.sprite.p0{background-position-x:0%}
 .npc-portrait.sprite.p1{background-position-x:50%}
 .npc-portrait.sprite.p2{background-position-x:100%}
@@ -300,7 +302,7 @@ display:flex;align-items:center;justify-content:center;font-size:32px;image-rend
 .arc-progress .arc-step.done{background:linear-gradient(90deg,#7aff00,#ccff00);border-color:#4a5a1a;box-shadow:0 0 6px rgba(204,255,0,0.3)}
 .arc-progress .arc-step.active{background:linear-gradient(90deg,#0a84ff,#5ac8fa);border-color:#1a3a5a;box-shadow:0 0 6px rgba(90,200,250,0.25)}
 .swipe-card .card-title{display:none !important}
-.swipe-card .card-desc{color:#999;font-size:13px;line-height:1.6;background:#050505;padding:8px 10px;border-radius:0;margin-bottom:6px;border-left:2px solid #333}
+.swipe-card .card-desc{color:#999;font-size:13px;line-height:1.6;background:#050505;padding:8px 10px;border-radius:0;margin-bottom:6px;border-left:2px solid #333;max-height:42vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .swipe-card .card-costs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}
 .swipe-card .card-costs span{font-size:11px;background:#111;padding:2px 8px;border-radius:0;color:#888;border:1px solid #222;font-family:'JetBrains Mono',monospace}
 .swipe-card .swipe-label{position:absolute;top:15px;font-size:16px;font-weight:900;padding:4px 14px;border:2px solid;border-radius:0;opacity:0;pointer-events:none;transition:opacity 0.15s;font-family:'JetBrains Mono',monospace;letter-spacing:2px}

@@ -135,7 +135,9 @@ Object.assign(G, {
     const avatar = evt.avatar || '🫥';
     const sheet = this.p2ResolvePortraitSheet(evt);
     const portraitIdx = this.p2ResolvePortraitIdx(evt, sheet);
-    const portraitCls = (code === '4974')
+    const portraitCls = (evt.id === 'influencer_beg')
+      ? 'custom influencerbeg'
+      : (code === '4974')
       ? 'custom wangdaye'
       : (code === '4539')
         ? 'custom scavenger'
@@ -147,6 +149,8 @@ Object.assign(G, {
           ? 'custom mentor'
         : (code === '3175')
           ? 'custom colleague'
+        : (code === '4671')
+          ? 'custom exbf'
         : ((sheet && portraitIdx >= 0) ? `sprite ${sheet} p${portraitIdx}` : '');
     const portraitInner = (portraitCls ? '' : '&nbsp;');
     return `
@@ -200,6 +204,9 @@ Object.assign(G, {
     document.getElementById('phase2Transition').classList.remove('show');
     WH.stopLoop();
     if (typeof this.stopCapacityFx === 'function') this.stopCapacityFx();
+    // Clean up any Phase 1 tutorial leftovers on mobile.
+    if (typeof this.removeTip === 'function') this.removeTip();
+    document.querySelectorAll('.tutorial-highlight').forEach(e => e.classList.remove('tutorial-highlight'));
     const s = this.s;
     s.phase = 2;
     s.p2day = 0; s.exposure = 0; s.hp = 100;
@@ -825,6 +832,23 @@ Object.assign(G, {
         this.log('💥 快递骗局伏击！入侵战导致你重伤，防御系统受损。');
         this.notif('💥 伏击命中：HP-26，防御受损3天','danger');
         break;
+      case 'exBfBreach': {
+        // Two darkly comic outcomes, both bad for player.
+        if (Math.random() < 0.5) {
+          s.defense = Math.max(0, s.defense - 30);
+          s.defDebuffDays = Math.max(s.defDebuffDays || 0, 3);
+          this.log('💣 软饭男引暴徒强拆外层气闸，防御设施重创。');
+          this.notif('💣 防御设施受损：DEF-30（临时）','danger');
+          this.p2Chat('📡','系统','入侵已清除，但外层气闸电机损坏。建议立即修复防线。','sys');
+        } else {
+          s.foodPool = Math.max(0, s.foodPool - 15);
+          s.euphCurrency = Math.max(0, s.euphCurrency - 50);
+          this.log('☣️ 软饭男突袭被清除，但走廊污染严重，补给与情绪双降。');
+          this.notif('☣️ 环境污染：食物-15，爽度-50','danger');
+          this.p2Chat('📡','系统','恒温走廊与水培区受污染，已启动净化流程。','sys');
+        }
+        break;
+      }
     }
   },
 
@@ -1027,8 +1051,11 @@ Object.assign(G, {
     const card = document.getElementById('swipeCard');
     if (!card || card.dataset.init) return;
     card.dataset.init = '1';
-    let sx=0,dx=0,drag=false;
-    const onS = x=>{sx=x;drag=true;card.classList.add('dragging');};
+    let sx=0, sy=0, dx=0, dy=0, drag=false, axisLocked='';
+    const onS = (x,y)=>{
+      sx=x; sy=y; dx=0; dy=0; drag=true; axisLocked='';
+      card.classList.add('dragging');
+    };
     const onM = x=>{
       if(!drag)return; dx=x-sx;
       card.style.transform=`translateX(${dx}px) rotate(${dx*0.08}deg)`;
@@ -1042,11 +1069,30 @@ Object.assign(G, {
       else{card.style.transform='';card.classList.remove('swiping-left','swiping-right');}
       dx=0;
     };
-    card.addEventListener('touchstart',e=>onS(e.touches[0].clientX),{passive:true});
-    card.addEventListener('touchmove',e=>{e.preventDefault();onM(e.touches[0].clientX);},{passive:false});
+    card.addEventListener('touchstart',e=>{
+      const t = e.touches[0];
+      onS(t.clientX, t.clientY);
+    },{passive:true});
+    card.addEventListener('touchmove',e=>{
+      if (!drag) return;
+      const t = e.touches[0];
+      dx = t.clientX - sx;
+      dy = t.clientY - sy;
+      if (!axisLocked) {
+        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+          axisLocked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        } else {
+          return;
+        }
+      }
+      // Vertical gesture: let container scroll naturally on mobile.
+      if (axisLocked === 'y') return;
+      e.preventDefault();
+      onM(t.clientX);
+    },{passive:false});
     card.addEventListener('touchend',onE);
     card.addEventListener('mousedown',e=>{
-      onS(e.clientX);
+      onS(e.clientX, e.clientY);
       const mm=ev=>onM(ev.clientX);
       const mu=()=>{onE();document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);};
       document.addEventListener('mousemove',mm);
