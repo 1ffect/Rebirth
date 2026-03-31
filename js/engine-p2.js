@@ -6,6 +6,180 @@
 G.P2_EVENTS = P2_EVENTS;
 
 Object.assign(G, {
+  P2_COMPANION_EVENT_SET: {
+    recruit_owl: true, recruit_hunter: true, recruit_chef: true, recruit_seed: true,
+    owl_bond_up: true, hunter_bond_up: true, seed_bond_up: true, triple_bond: true,
+    owl_airdrop: true
+  },
+  P2_SCUM_EVENT_SET: {
+    ex_bf: true, ex_colleague: true, ex_rescue: true, ex_discover: true, ex_betrayal: true,
+    ex_revenge: true, ex_redemption: true, livestream_drama: true, revenge_delivery: true,
+    influencer_beg: true, moral_kidnap: true, debt_collector: true, gang_threat: true,
+    neighbor_revenge: true
+  },
+  // Portrait index semantics:
+  // comp: 0=机械工程系, 1=科研生物系, 2=医疗行动系
+  // scum: 0=暴戾男, 1=操控女, 2=怯懦男
+  P2_COMPANION_PORTRAIT_BY_EVENT: {
+    recruit_hunter: 0,
+    hunter_old_enemy: 0,
+    hunter_bond_up: 0,
+    recruit_seed: 1,
+    seed_bond_up: 1,
+    recruit_owl: 2,
+    owl_bond_up: 2,
+    owl_airdrop: 2,
+    recruit_chef: 2,
+    triple_bond: 1
+  },
+  P2_SCUM_PORTRAIT_BY_EVENT: {
+    gang_threat: 0,
+    debt_collector: 0,
+    neighbor_revenge: 0,
+    moral_kidnap: 0,
+    revenge_delivery: 0,
+    ex_bf: 0,
+    ex_rescue: 2,
+    ex_discover: 2,
+    ex_redemption: 2,
+    ex_colleague: 2,
+    ex_betrayal: 1,
+    ex_revenge: 1,
+    livestream_drama: 1,
+    influencer_beg: 1
+  },
+  P2_LEGACY_TYPE_TO_PORTRAIT: {
+    bond: 1,
+    bond_event: 1,
+    resource: 2,
+    random: 2,
+    emotional: 2,
+    tech: 1,
+    drama: 1,
+    threat: 0,
+    trap: 0,
+    horror: 0,
+    companion_exclusive: 1
+  },
+  P2_NPC_PORTRAIT_MAP: {
+    // Companion / bond lines
+    recruit_owl: 1,
+    recruit_hunter: 0,
+    recruit_chef: 1,
+    recruit_seed: 2,
+    owl_bond_up: 1,
+    hunter_bond_up: 0,
+    seed_bond_up: 2,
+    triple_bond: 1,
+    hunter_old_enemy: 0,
+    owl_airdrop: 1,
+
+    // Ex / drama lines
+    ex_bf: 1,
+    ex_colleague: 1,
+    ex_rescue: 1,
+    ex_discover: 1,
+    ex_betrayal: 1,
+    ex_revenge: 1,
+    ex_redemption: 1,
+    livestream_drama: 1,
+    revenge_delivery: 1,
+    influencer_beg: 1,
+    moral_kidnap: 0,
+
+    // Threat lines
+    gang_threat: 0,
+    debt_collector: 0,
+    neighbor_revenge: 0,
+    organ_failure: 2,
+    child_cry: 2
+  },
+  p2ResolvePortraitSheet(evt) {
+    if (
+      this.P2_COMPANION_PORTRAIT_BY_EVENT[evt.id] !== undefined ||
+      this.P2_COMPANION_EVENT_SET[evt.id]
+    ) return 'comp';
+    if (
+      this.P2_SCUM_PORTRAIT_BY_EVENT[evt.id] !== undefined ||
+      this.P2_SCUM_EVENT_SET[evt.id]
+    ) return 'scum';
+    return '';
+  },
+  p2ResolvePortraitIdx(evt, sheet) {
+    if (sheet === 'comp') {
+      const byEvent = this.P2_COMPANION_PORTRAIT_BY_EVENT[evt.id];
+      if (typeof byEvent === 'number') return byEvent;
+      return -1;
+    }
+    if (sheet === 'scum') {
+      const byEvent = this.P2_SCUM_PORTRAIT_BY_EVENT[evt.id];
+      if (typeof byEvent === 'number') return byEvent;
+      return -1;
+    }
+    return -1;
+  },
+  p2BuildNpcCard(evt) {
+    const tags = ['囤货狂','末日前任','神棍邻居','黑市黄牛','情绪炸弹','摆烂哲人','社恐来客','极端求生派'];
+    const hooks = [
+      '开口先借物资，结尾必反转。',
+      '话术离谱，但总能戳中人性弱点。',
+      '看起来不靠谱，却可能带来关键收益。',
+      '每次选择都在赌你的避难所未来。'
+    ];
+    const src = evt.id || evt.title || 'npc';
+    let hash = 0;
+    for (let i = 0; i < src.length; i++) hash = (hash * 31 + src.charCodeAt(i)) >>> 0;
+    const tag = evt.npcTag || tags[hash % tags.length];
+    const hook = evt.npcHook || hooks[hash % hooks.length];
+    const code = String((evt.npcCode ?? (hash % 9999))).padStart(4, '0');
+    const avatar = evt.avatar || '🫥';
+    const sheet = this.p2ResolvePortraitSheet(evt);
+    const portraitIdx = this.p2ResolvePortraitIdx(evt, sheet);
+    const portraitCls = (code === '4974')
+      ? 'custom wangdaye'
+      : (code === '4539')
+        ? 'custom scavenger'
+        : (code === '3310')
+          ? 'custom chefwoman'
+        : (code === '1930')
+          ? 'custom linainai'
+        : (code === '1800')
+          ? 'custom mentor'
+        : (code === '3175')
+          ? 'custom colleague'
+        : ((sheet && portraitIdx >= 0) ? `sprite ${sheet} p${portraitIdx}` : '');
+    const portraitInner = (portraitCls ? '' : '&nbsp;');
+    return `
+      <div class="npc-card">
+        <div class="npc-portrait ${portraitCls}">${portraitInner}</div>
+        <div class="npc-meta">
+          <div class="npc-row-top"><span class="npc-id">NPC-${code}</span><span class="npc-tag">${tag}</span></div>
+          <div class="npc-name">${evt.title || '匿名幸存者'}</div>
+          <div class="npc-hook">${hook}</div>
+        </div>
+      </div>`;
+  },
+  p2BuildArcProgress(evt) {
+    const mentorIds = ['livestream_drama', 'mentor_masterclass', 'mentor_collapse'];
+    const idx = mentorIds.indexOf(evt.id);
+    if (idx < 0) return '';
+    const doneCount =
+      (this.s.p2Flags.includes('mentor_seeded') ? 1 : 0) +
+      (this.s.p2Flags.includes('mentor_countered') ? 1 : 0);
+    let active = 0;
+    if (evt.id === 'livestream_drama') active = 1;
+    else if (evt.id === 'mentor_masterclass') active = 2;
+    else active = 3;
+    const stepCls = (n) => n <= doneCount ? 'arc-step done' : (n === active ? 'arc-step active' : 'arc-step');
+    return `<div class="arc-progress">
+      <div class="arc-title">剧情线：废土鸡汤骗局 ${active}/3</div>
+      <div class="arc-steps">
+        <div class="${stepCls(1)}"></div>
+        <div class="${stepCls(2)}"></div>
+        <div class="${stepCls(3)}"></div>
+      </div>
+    </div>`;
+  },
 
   showPhase2Transition() {
     const s = this.s;
@@ -25,6 +199,7 @@ Object.assign(G, {
   enterPhase2() {
     document.getElementById('phase2Transition').classList.remove('show');
     WH.stopLoop();
+    if (typeof this.stopCapacityFx === 'function') this.stopCapacityFx();
     const s = this.s;
     s.phase = 2;
     s.p2day = 0; s.exposure = 0; s.hp = 100;
@@ -640,6 +815,16 @@ Object.assign(G, {
         setTimeout(() => this.p2Chat('🏹','楚狄','——我们一起守护。'), 400);
         setTimeout(() => this.p2Chat('🌺','黎冥','花茶凉了哦。快喝。'), 800);
         break;
+      case 'courierAmbush':
+        // "Weapon durability" equivalent in current systems:
+        // apply direct HP damage + temporary defense debuff.
+        s.hp = Math.max(1, s.hp - 26);
+        s.defDebuffDays = Math.max(s.defDebuffDays || 0, 3);
+        s.foodPool = Math.max(0, s.foodPool - 3);
+        s.waterPool = Math.max(0, s.waterPool - 2);
+        this.log('💥 快递骗局伏击！入侵战导致你重伤，防御系统受损。');
+        this.notif('💥 伏击命中：HP-26，防御受损3天','danger');
+        break;
     }
   },
 
@@ -726,6 +911,7 @@ Object.assign(G, {
 
   // ===== PHASE 2 RENDERING =====
   p2Render() {
+    if (typeof this.updateDynamicBackgrounds === 'function') this.updateDynamicBackgrounds();
     this.p2RenderStatus();
     this.p2RenderExposure();
     this.p2RenderAppBar();
@@ -824,8 +1010,8 @@ Object.assign(G, {
         <div class="swipe-card" id="swipeCard">
           <span class="swipe-label lbl-left">接纳</span>
           <span class="swipe-label lbl-right">拒绝</span>
-          <div class="card-avatar">${evt.avatar}</div>
-          <div class="card-title">${evt.title}</div>
+          ${this.p2BuildNpcCard(evt)}
+          ${this.p2BuildArcProgress(evt)}
           <div class="card-desc">${evtDesc}</div>
           <div class="card-costs">${costStr}</div>
         </div>

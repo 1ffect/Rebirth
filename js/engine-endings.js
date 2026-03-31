@@ -365,7 +365,7 @@ Object.assign(G, {
   // ========================================
   // SAVE / LOAD SYSTEM (localStorage)
   // ========================================
-  SAVE_KEY: 'doomsday_save_v1',
+  SAVE_KEY: 'doomsday_save_v2',
 
   saveGame() {
     try {
@@ -392,6 +392,7 @@ Object.assign(G, {
   },
 
   resumeFromSave() {
+    if (typeof SFX.startBgm === 'function') SFX.startBgm();
     const save = this.loadSave();
     if (!save) return;
     // Merge saved state onto fresh state to ensure new fields have defaults

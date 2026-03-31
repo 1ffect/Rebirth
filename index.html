@@ -6,7 +6,7 @@
 <title>末日重生模拟器 v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 
@@ -55,8 +55,12 @@
   <div class="warehouse-wrap" id="warehouseWrap">
     <canvas id="whCanvas"></canvas>
     <div class="cap-bar-wrap"><div class="cap-fill green" id="capFill" style="width:0%"></div></div>
+    <div class="cap-overflow" id="capOverflow"></div>
+    <div class="cap-cracks" id="capCracks"></div>
     <div class="cap-text" id="capText">空间充裕 0%</div>
+    <div class="cap-glitch-text" id="capGlitchText">0/100m³</div>
     <div class="space-warn" id="spaceWarn">⚠ 空间告急 — 扩容或停止采购 ⚠</div>
+    <div class="cap-critical-banner" id="capCriticalBanner">WARNING: CRITICAL!</div>
   </div>
   <div class="p2-status-area" id="p2StatusArea">
     <div class="p2-hp-row">
@@ -84,21 +88,22 @@
   <div class="p2-sub" id="p2Sub"></div>
   <button class="p2-btn" onclick="G.enterPhase2()">进入避难所</button>
 </div>
+<div id="lootStormOverlay"></div>
 <div id="raidOverlay"><div class="raid-box" id="raidBox"></div></div>
 <div class="dm-hack" id="dmHack"></div>
 <div id="darkMarket"></div>
 <div class="ending-overlay" id="endingOverlay" style="background:linear-gradient(180deg,#000,#001a0a)"><div class="ending-box" id="endingBox"></div></div>
 <div class="crt-overlay" id="crtOverlay"></div>
 
-<script src="js/sfx.js?v=4"></script>
-<script src="js/meta.js?v=4"></script>
-<script src="js/warehouse.js?v=4"></script>
-<script src="js/companions.js?v=4"></script>
-<script src="js/data.js?v=4"></script>
-<script src="js/events-p2.js?v=4"></script>
-<script src="js/engine-core.js?v=4"></script>
-<script src="js/engine-p2.js?v=4"></script>
-<script src="js/engine-endings.js?v=4"></script>
+<script src="js/sfx.js?v=5"></script>
+<script src="js/meta.js?v=5"></script>
+<script src="js/warehouse.js?v=5"></script>
+<script src="js/companions.js?v=5"></script>
+<script src="js/data.js?v=5"></script>
+<script src="js/events-p2.js?v=5"></script>
+<script src="js/engine-core.js?v=5"></script>
+<script src="js/engine-p2.js?v=5"></script>
+<script src="js/engine-endings.js?v=5"></script>
 <script>window.addEventListener('DOMContentLoaded', () => G.init());</script>
 </body>
 </html>

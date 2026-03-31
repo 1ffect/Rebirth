@@ -8,6 +8,24 @@ const G = {
   TICK_MS: 440,
   HOURS_PER_TICK: 4,
   tickTimer: null,
+  CAPACITY_FX: {
+    safeMax: 0.6,
+    criticalMin: 0.9,
+    pressurizedBackstep: 0.94,
+    pressurizedOvershoot: 1.06,
+    criticalShakeX: 3.2,
+    criticalShakeY: 2.6,
+    criticalGlitchMs: 420
+  },
+  capFxState: 'safe',
+  capJitterTimer: null,
+  capGlitchTimer: null,
+  capGlitchSettleTimer: null,
+  capTextLockUntil: 0,
+  capBurstPlayed: false,
+  buySpamCombo: 0,
+  buySpamTs: 0,
+  lootSpriteMap: null,
 
   // ===== STATE =====
   newState() {
@@ -47,6 +65,8 @@ const G = {
     document.getElementById('appBar').classList.remove('four-col');
     document.getElementById('warehouseWrap').style.display = '';
     document.getElementById('p2StatusArea').classList.remove('show');
+    this.initLootSprites();
+    this.stopCapacityFx();
     const tt = document.querySelector('.topbar .title');
     if (tt) tt.textContent = 'DOOMSDAY';
     this.showIntro();
@@ -93,6 +113,7 @@ const G = {
   },
 
   startGame() {
+    if (typeof SFX.startBgm === 'function') SFX.startBgm();
     const o = document.getElementById('intro-overlay');
     o.classList.add('fade-out');
     setTimeout(() => {
@@ -146,6 +167,203 @@ const G = {
   },
   showTip(t) { this.removeTip(); const e=document.createElement('div'); e.className='tutorial-tip'; e.id='tutTip'; e.textContent=t; document.body.appendChild(e); },
   removeTip() { const e=document.getElementById('tutTip'); if(e)e.remove(); },
+  initLootSprites() { if (!this.lootSpriteMap) this.lootSpriteMap = {}; },
+  updateDynamicBackgrounds() {
+    const panel = document.getElementById('modulePanel');
+    if (!panel) return;
+    panel.classList.remove('bg-shop-panel', 'bg-phase2-normal', 'bg-phase2-threat');
+    if (this.s.phase === 1) {
+      if (this.s.app === 'shop') panel.classList.add('bg-shop-panel');
+      return;
+    }
+    const threatState = this.s.exposure >= 60 || (this.s.pendingEvent && this.s.pendingEvent.type === 'threat');
+    panel.classList.add(threatState ? 'bg-phase2-threat' : 'bg-phase2-normal');
+  },
+  getLootSprite(itemId) {
+    if (!this.lootSpriteMap) return '';
+    return this.lootSpriteMap[itemId] || '';
+  },
+  buildAtlasSprite() { return null; },
+  spawnLootStorm(item, intensity = 1) {
+    let overlay = document.getElementById('lootStormOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'lootStormOverlay';
+      document.body.appendChild(overlay);
+    }
+    if (!overlay || this.s.phase !== 1) return;
+    overlay.classList.add('loot-storm-overlay');
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.zIndex = '180';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.overflow = 'hidden';
+    const base = 4 + Math.floor(Math.random() * 3);
+    const drops = Math.max(1, Math.min(24, base + Math.floor(intensity * 2.3)));
+    const targetEl = document.querySelector('.cap-bar-wrap') || document.getElementById('capFill');
+    const targetRect = targetEl ? targetEl.getBoundingClientRect() : null;
+    const targetX = targetRect ? targetRect.left + targetRect.width * (0.15 + Math.random() * 0.7) : window.innerWidth * 0.5;
+    const targetY = targetRect ? targetRect.top + targetRect.height * 0.5 : 16;
+
+    for (let i = 0; i < drops; i++) {
+      const d = document.createElement('div');
+      d.className = 'loot-drop' + (intensity >= 4 ? ' heavy' : '');
+      const size = 30 + Math.floor(Math.random() * 18) + Math.min(14, intensity * 2);
+      d.style.position = 'absolute';
+      d.style.left = '0';
+      d.style.top = '0';
+      d.style.width = `${size}px`;
+      d.style.height = `${size}px`;
+      d.style.display = 'flex';
+      d.style.alignItems = 'center';
+      d.style.justifyContent = 'center';
+      d.style.willChange = 'transform,opacity';
+      d.style.filter = intensity >= 4 ? 'drop-shadow(0 0 8px rgba(255,120,120,0.45))' : 'drop-shadow(0 0 6px rgba(255,255,255,0.3))';
+      d.textContent = item.icon || '📦';
+      d.style.fontSize = `${Math.max(14, Math.floor(size * 0.55))}px`;
+      d.style.lineHeight = '1';
+      d.style.color = '#fff';
+      d.style.opacity = `${0.78 + Math.random() * 0.22}`;
+
+      const startX = Math.random() * window.innerWidth;
+      const startY = -24 - Math.random() * 80;
+      const driftX = (Math.random() - 0.5) * 130;
+      const floorY = window.innerHeight * (0.72 + Math.random() * 0.22);
+      const dropMs = 420 + Math.random() * 360;
+      const holdMs = 900 + Math.random() * 850;
+
+      d.style.transform = `translate(${startX}px, ${startY}px) rotate(${(Math.random() - 0.5) * 40}deg)`;
+      overlay.appendChild(d);
+
+      requestAnimationFrame(() => {
+        d.style.transition = `transform ${dropMs}ms cubic-bezier(0.12, 0.75, 0.28, 1), opacity ${dropMs}ms linear`;
+        d.style.transform = `translate(${startX + driftX}px, ${floorY}px) rotate(${(Math.random() - 0.5) * 80}deg)`;
+      });
+
+      setTimeout(() => {
+        const tx = targetX + (Math.random() - 0.5) * 40;
+        const ty = targetY + (Math.random() - 0.5) * 10;
+        d.style.transition = 'transform 320ms cubic-bezier(0.2, 0.9, 0.2, 1), opacity 280ms ease-out';
+        d.style.transform = `translate(${tx}px, ${ty}px) scale(0.26)`;
+        d.style.opacity = '0';
+        setTimeout(() => {
+          if (d.parentNode) d.parentNode.removeChild(d);
+          const spark = document.createElement('div');
+          spark.className = 'loot-spark';
+          spark.style.left = `${tx}px`;
+          spark.style.top = `${ty}px`;
+          overlay.appendChild(spark);
+          setTimeout(() => spark.remove(), 360);
+        }, 340);
+      }, dropMs + holdMs);
+    }
+  },
+  stopCapacityFx() {
+    if (this.capJitterTimer) { clearInterval(this.capJitterTimer); this.capJitterTimer = null; }
+    if (this.capGlitchTimer) { clearInterval(this.capGlitchTimer); this.capGlitchTimer = null; }
+    if (this.capGlitchSettleTimer) { clearTimeout(this.capGlitchSettleTimer); this.capGlitchSettleTimer = null; }
+    const wrap = document.getElementById('warehouseWrap');
+    if (wrap) {
+      wrap.style.transform = '';
+      wrap.classList.remove('safe', 'pressurized', 'critical');
+      wrap.classList.add('safe');
+    }
+    const glitchText = document.getElementById('capGlitchText');
+    if (glitchText) glitchText.textContent = `${this.s?.used || 0}/${this.s?.capacity || 100}m³`;
+    this.capFxState = 'safe';
+    this.capTextLockUntil = 0;
+    this.capBurstPlayed = false;
+    if (typeof SFX.stopCapacityAmbience === 'function') SFX.stopCapacityAmbience();
+  },
+  setStateSafe() {
+    const wrap = document.getElementById('warehouseWrap');
+    if (!wrap) return;
+    wrap.classList.remove('pressurized', 'critical');
+    wrap.classList.add('safe');
+    if (this.capJitterTimer) { clearInterval(this.capJitterTimer); this.capJitterTimer = null; }
+    if (this.capGlitchTimer) { clearInterval(this.capGlitchTimer); this.capGlitchTimer = null; }
+    wrap.style.transform = '';
+    if (typeof SFX.setCapacityAmbience === 'function') SFX.setCapacityAmbience('safe');
+  },
+  setStatePressurized() {
+    const wrap = document.getElementById('warehouseWrap');
+    if (!wrap) return;
+    wrap.classList.remove('safe', 'critical');
+    wrap.classList.add('pressurized');
+    if (this.capJitterTimer) { clearInterval(this.capJitterTimer); this.capJitterTimer = null; }
+    if (this.capGlitchTimer) { clearInterval(this.capGlitchTimer); this.capGlitchTimer = null; }
+    wrap.style.transform = '';
+    if (typeof SFX.setCapacityAmbience === 'function') SFX.setCapacityAmbience('pressurized');
+  },
+  setStateCritical() {
+    const wrap = document.getElementById('warehouseWrap');
+    if (!wrap) return;
+    wrap.classList.remove('safe', 'pressurized');
+    wrap.classList.add('critical');
+    if (!this.capJitterTimer) {
+      this.capJitterTimer = setInterval(() => {
+        const x = (Math.random() - 0.5) * this.CAPACITY_FX.criticalShakeX;
+        const y = (Math.random() - 0.5) * this.CAPACITY_FX.criticalShakeY;
+        wrap.style.transform = `translate(${x}px, ${y}px)`;
+      }, 42);
+    }
+    if (!this.capGlitchTimer) {
+      this.capGlitchTimer = setInterval(() => {
+        const s = this.s;
+        const real = `${s.used}/${s.capacity}m³`;
+        const n1 = Math.max(0, s.used + Math.floor((Math.random() - 0.5) * 60));
+        const n2 = Math.max(s.capacity, s.capacity + Math.floor(Math.random() * 90));
+        const lock = Date.now() < this.capTextLockUntil;
+        const txt = lock || Math.random() > 0.25 ? `${n1}/${n2}m³` : real;
+        const el = document.getElementById('capGlitchText');
+        if (el) el.textContent = txt;
+      }, 55);
+    }
+    if (typeof SFX.setCapacityAmbience === 'function') SFX.setCapacityAmbience('critical');
+  },
+  runCapacityImpact(pct) {
+    const fill = document.getElementById('capFill');
+    const app = document.getElementById('app');
+    if (!fill || !app) return;
+    if (pct >= 90) {
+      this.capTextLockUntil = Date.now() + this.CAPACITY_FX.criticalGlitchMs;
+      if (this.capGlitchSettleTimer) clearTimeout(this.capGlitchSettleTimer);
+      this.capGlitchSettleTimer = setTimeout(() => {
+        const s = this.s;
+        const glitchText = document.getElementById('capGlitchText');
+        if (glitchText) glitchText.textContent = `${s.used}/${s.capacity}m³`;
+      }, this.CAPACITY_FX.criticalGlitchMs + 30);
+      fill.animate([
+        { transform: 'scaleX(0.985) translateX(-2px)', filter: 'brightness(1)' },
+        { transform: 'scaleX(1.03) translateX(0px)', filter: 'brightness(1.45)' },
+        { transform: 'scaleX(1)', filter: 'brightness(1)' }
+      ], { duration: 240, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+      app.animate([
+        { transform: 'translate(0,0)' },
+        { transform: 'translate(-6px,3px)' },
+        { transform: 'translate(7px,-4px)' },
+        { transform: 'translate(-3px,2px)' },
+        { transform: 'translate(0,0)' }
+      ], { duration: 210, easing: 'ease-out' });
+      SFX.play('buyLock');
+      if (pct >= 99 && !this.capBurstPlayed) {
+        this.capBurstPlayed = true;
+        SFX.play('burst');
+      }
+      return;
+    }
+    if (pct >= 60) {
+      fill.animate([
+        { transform: `scaleX(${this.CAPACITY_FX.pressurizedBackstep}) translateX(-3px)`, offset: 0 },
+        { transform: `scaleX(${this.CAPACITY_FX.pressurizedBackstep}) translateX(-3px)`, offset: 0.22 },
+        { transform: `scaleX(${this.CAPACITY_FX.pressurizedOvershoot}) translateX(0)`, offset: 0.62 },
+        { transform: 'scaleX(1) translateX(0)' }
+      ], { duration: 300, easing: 'cubic-bezier(0.2, 0.9, 0.2, 1)' });
+      SFX.play('buyHeavy');
+      return;
+    }
+    SFX.play('buy');
+  },
 
   // ===== CLOCK (60-second sprint) =====
   startClock() {
@@ -277,6 +495,7 @@ const G = {
   // ===== RENDER =====
   render() {
     if (this.s.phase === 2) { this.p2Render(); return; }
+    this.updateDynamicBackgrounds();
     this.updateStatusBar();
     this.updateAppBar();
     this.updateModulePanel();
@@ -355,6 +574,7 @@ const G = {
     } else if (s.app === 'base') {
       // Base upgrades
       let html = `<div class="m-header"><span>🏗️ 避难所升级 (当前容量: ${s.capacity}m³)</span></div>`;
+      html += `<div class="base-stage-preview"></div>`;
       this.BASE_TIERS.forEach((tier, i) => {
         const isCurrent = s.baseLv === i;
         const isDone = s.baseLv > i;
@@ -382,20 +602,26 @@ const G = {
   updateWarehouseUI() {
     const s = this.s;
     const pct = s.capacity > 0 ? Math.min(100, (s.used / s.capacity) * 100) : 0;
+    const ratio = pct / 100;
     const fill = document.getElementById('capFill');
     fill.style.width = pct + '%';
-    fill.className = 'cap-fill ' + (pct > 80 ? 'red' : pct > 50 ? 'yellow' : 'green');
-    const ct = document.getElementById('capText');
-    if (pct > 80) ct.textContent = `⚠ 告急 ${pct.toFixed(0)}% (${s.used}/${s.capacity}m³)`;
-    else if (pct > 50) ct.textContent = `紧张 ${pct.toFixed(0)}% (${s.used}/${s.capacity}m³)`;
-    else ct.textContent = `充裕 ${pct.toFixed(0)}% (${s.used}/${s.capacity}m³)`;
-    WH.phase = pct > 80 ? 'red' : pct > 50 ? 'yellow' : 'green';
-    document.getElementById('spaceWarn').style.display = pct > 80 ? 'block' : 'none';
-    if (pct > 80) {
-      const w = document.getElementById('warehouseWrap');
-      w.classList.add('shake');
-      setTimeout(() => w.classList.remove('shake'), 400);
+    const nextState = ratio >= this.CAPACITY_FX.criticalMin ? 'critical' : ratio >= this.CAPACITY_FX.safeMax ? 'pressurized' : 'safe';
+    if (nextState !== this.capFxState) {
+      this.capFxState = nextState;
+      if (nextState === 'critical') this.setStateCritical();
+      else if (nextState === 'pressurized') this.setStatePressurized();
+      else this.setStateSafe();
     }
+    fill.className = 'cap-fill ' + (nextState === 'critical' ? 'red' : nextState === 'pressurized' ? 'yellow' : 'green');
+    const ct = document.getElementById('capText');
+    const rawText = `${s.used}/${s.capacity}m³`;
+    if (nextState === 'critical') ct.textContent = `☠ 临界 ${pct.toFixed(0)}% (${rawText})`;
+    else if (nextState === 'pressurized') ct.textContent = `⚠ 压迫 ${pct.toFixed(0)}% (${rawText})`;
+    else ct.textContent = `空间充裕 ${pct.toFixed(0)}% (${rawText})`;
+    const gt = document.getElementById('capGlitchText');
+    if (gt && nextState !== 'critical') gt.textContent = rawText;
+    WH.phase = nextState === 'critical' ? 'red' : nextState === 'pressurized' ? 'yellow' : 'green';
+    document.getElementById('spaceWarn').style.display = nextState === 'critical' ? 'block' : 'none';
   },
 
   // ===== FINANCE ACTIONS (极简3按钮) =====
@@ -505,9 +731,15 @@ const G = {
     s.used += item.vol;
     s.stock[itemId] = (s.stock[itemId] || 0) + 1;
     s.euphoria += item.chill;
+    const now = Date.now();
+    this.buySpamCombo = (now - this.buySpamTs < 260) ? this.buySpamCombo + 1 : 1;
+    this.buySpamTs = now;
 
     WH.addItem(item, 1);
-    SFX.play('buy');
+    const buyPct = s.capacity > 0 ? ((s.used / s.capacity) * 100) : 0;
+    this.runCapacityImpact(buyPct);
+    const stormIntensity = Math.min(8, 1 + Math.floor(this.buySpamCombo / 2) + (buyPct >= 90 ? 2 : buyPct >= 60 ? 1 : 0));
+    this.spawnLootStorm(item, stormIntensity);
     this.log(`${item.icon} ${item.name} -${this.fmtMoney(cost)} +${item.chill}松弛`);
     this.notif(`${item.icon} ${item.name}入库！`, 'success');
     if (this.s.tutorialStep === 2 && s.used >= s.capacity * 0.8) this.tutorialStep3();
