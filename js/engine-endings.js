@@ -18,9 +18,12 @@ Object.assign(G, {
     const euphScore = s.euphCurrency;
     const compScore = s.companions.length * 200;
     const bondScore = Object.values(s.companionBond).reduce((a,b)=>a+b,0) * 150;
+    const personalEndingIds = ['owl_personal_ending', 'hunter_personal_ending', 'seed_personal_ending'];
+    const personalEndingCount = personalEndingIds.filter(id => s.p2Flags.includes(id)).length;
+    const personalEndingScore = personalEndingCount * 1200;
     const surviveBonus = alive && survived >= 60 ? 2000 : 0;
     const endingBonus = s.flags.heliTriggered ? 3000 : s.flags.dungeonTriggered ? 5000 : 0;
-    const totalScore = dayScore + assetScore + euphScore + compScore + bondScore + surviveBonus + endingBonus;
+    const totalScore = dayScore + assetScore + euphScore + compScore + bondScore + personalEndingScore + surviveBonus + endingBonus;
 
     // 评级
     META.load();
@@ -56,6 +59,13 @@ Object.assign(G, {
       const b=s.companionBond[id]||0;const bn=['','♥','♥♥','♥♥♥'];
       return c.icon+c.name+(bn[b]?' '+bn[b]:'');
     }).filter(Boolean).join('  ') || '无';
+    const personalEndingStr = [
+      s.p2Flags.includes('owl_personal_ending') ? '💎 夜鸮' : '',
+      s.p2Flags.includes('hunter_personal_ending') ? '🗡️ 月狩' : '',
+      s.p2Flags.includes('seed_personal_ending') ? '💉 冥种' : ''
+    ].filter(Boolean).join('  ');
+    const notesFound = (s.privateNotes || []).slice(-4);
+    const notePreview = notesFound.join(' · ');
 
     document.getElementById('endScreen').innerHTML = `
       <div class="content" style="max-width:360px;max-height:90vh;overflow-y:auto">
@@ -68,6 +78,10 @@ Object.assign(G, {
           <div style="display:flex;justify-content:space-between"><span>剩余资产</span><span style="color:#32d74b;font-weight:700">F:${s.foodPool} W:${s.waterPool} D:${s.defense} <span style="color:#333">+${assetScore}</span></span></div>
           <div style="display:flex;justify-content:space-between"><span>爽度累计</span><span style="color:#CCFF00;font-weight:700">${s.euphCurrency} <span style="color:#333">+${euphScore}</span></span></div>
           <div style="display:flex;justify-content:space-between"><span>同伴</span><span style="color:#F5F5F5;font-weight:700">${compStr} <span style="color:#333">+${compScore+bondScore}</span></span></div>
+          ${personalEndingCount?'<div style="display:flex;justify-content:space-between"><span>个人结局</span><span style="color:#00aaff;font-weight:700">'+personalEndingCount+' 条 <span style="color:#333">+'+personalEndingScore+'</span></span></div>':''}
+          ${personalEndingStr?'<div style="font-size:10px;color:#00aaff;margin-top:2px">已解锁：'+personalEndingStr+'</div>':''}
+          ${(s.privateNotes||[]).length?'<div style="display:flex;justify-content:space-between"><span>私密碎片</span><span style="color:#ff9f0a;font-weight:700">'+(s.privateNotes||[]).length+' 份</span></div>':''}
+          ${notePreview?'<div style="font-size:10px;color:#666;margin-top:2px;line-height:1.5">遗物回顾：'+notePreview+'</div>':''}
           ${surviveBonus?'<div style="display:flex;justify-content:space-between"><span>通关加成</span><span style="color:#CCFF00;font-weight:700">+'+surviveBonus+'</span></div>':''}
           ${endingBonus?'<div style="display:flex;justify-content:space-between"><span>'+(s.flags.heliTriggered?'直升机救援':'地下城发现')+'</span><span style="color:#bf5af2;font-weight:700">+'+endingBonus+'</span></div>':''}
           <div style="border-top:1px dashed #222;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-size:16px"><span style="color:#F5F5F5;font-weight:700">TOTAL</span><span style="color:${rankColor};font-weight:700;font-size:20px">${totalScore.toLocaleString()}</span></div>

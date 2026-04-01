@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>末日重生模拟器 v2.1</title>
+<title>末日重生模拟器 v2.2</title>
 <script>
 (function () {
   if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
@@ -20,9 +20,20 @@
   if (!dir.endsWith('/')) dir += '/';
   window.__GAME_BASE__ = location.origin + dir;
 })();
+
+(function () {
+  function setAppVh() {
+    var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight || document.documentElement.clientHeight;
+    document.documentElement.style.setProperty('--app-vh', h + 'px');
+  }
+  setAppVh();
+  window.addEventListener('resize', setAppVh, { passive: true });
+  window.addEventListener('orientationchange', function () { setTimeout(setAppVh, 120); }, { passive: true });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', setAppVh, { passive: true });
+})();
 </script>
 <!-- 不引用 Google Fonts：境内/部分移动网络会长时间阻塞或失败，导致白屏 -->
-<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
 
@@ -61,7 +72,7 @@
   <div class="topbar">
     <div class="title">DOOMSDAY</div>
     <div class="countdown-bomb"><div class="tick-dot"></div><div class="digits" id="countdownDigits">30天 00:00:00</div></div>
-    <button style="background:#1a1a2a;border:1px solid #333;color:#888;padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:inherit" onclick="G.reset()">重开</button>
+    <button class="topbar-reset" onclick="G.reset()">重开</button>
   </div>
   <div class="status-bar" id="statusBar"></div>
   <div class="exposure-wrap" id="exposureWrap">
@@ -111,15 +122,15 @@
 <div class="ending-overlay" id="endingOverlay" style="background:linear-gradient(180deg,#000,#001a0a)"><div class="ending-box" id="endingBox"></div></div>
 <div class="crt-overlay" id="crtOverlay"></div>
 
-<script src="js/sfx.js?v=8"></script>
-<script src="js/meta.js?v=6"></script>
-<script src="js/warehouse.js?v=6"></script>
-<script src="js/companions.js?v=6"></script>
-<script src="js/data.js?v=6"></script>
-<script src="js/events-p2.js?v=6"></script>
-<script src="js/engine-core.js?v=6"></script>
-<script src="js/engine-p2.js?v=6"></script>
-<script src="js/engine-endings.js?v=6"></script>
+<script src="js/sfx.js?v=9"></script>
+<script src="js/meta.js?v=7"></script>
+<script src="js/warehouse.js?v=7"></script>
+<script src="js/companions.js?v=7"></script>
+<script src="js/data.js?v=7"></script>
+<script src="js/events-p2.js?v=7"></script>
+<script src="js/engine-core.js?v=7"></script>
+<script src="js/engine-p2.js?v=7"></script>
+<script src="js/engine-endings.js?v=7"></script>
 <script>window.addEventListener('DOMContentLoaded', () => G.init());</script>
 </body>
 </html>

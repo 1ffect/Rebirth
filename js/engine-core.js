@@ -43,13 +43,15 @@ const G = {
       // Phase 2
       p2day:0, exposure:0, hp:100,
       companions:[], companionBond:{}, chatLog:[],
+      privateNotes:[],
+      noteUnread:0,
       foodPool:0, waterPool:0, medPool:0,
       hasPower:false, hasGreenhouse:false,
       defense:0, euphProd:0, euphCurrency:0,
       pendingEvent:null, usedEvents:[], eventCooldowns:{},
       bonusEuphPerDay:0, p2app:'swipe', starveDays:0,
       tacticalWarning:false, defDebuffDays:0, companionDebuffs:{}, p2Flags:[],
-      noEventDays:0, p2TutStep:0
+      noEventDays:0, p2TutStep:0, p2ChatFilter:'all'
     };
   },
 

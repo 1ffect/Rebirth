@@ -17,6 +17,35 @@ Object.assign(G, {
     influencer_beg: true, moral_kidnap: true, debt_collector: true, gang_threat: true,
     neighbor_revenge: true
   },
+  P2_PRIVATE_NOTES: [
+    { id:'hunter_l1_log', companion:'hunter', level:1, title:'生存牢骚',
+      text:'今天在C区废墟，雷达扫到一个小孩。侧脸……很像我妹。我没敢上前探查生命体征，但躺在那个地方恐怕早已……' },
+    { id:'hunter_l2_firetalk', companion:'hunter', level:2, title:'火堆对话',
+      text:'上上次碰到个孩子，我连上前确认的勇气都没有。带回来又怎样？拿什么养？我不敢赌，只能选择视而不见。在现在的处境下，那是理智的决定，对吧？……可是，我已经连着好几夜不敢合眼了。' },
+    { id:'hunter_l3_battlelog', companion:'hunter', level:3, title:'行动日志-已作废',
+      text:'目标区域无高价值物资。遭遇一名女童，疑似难民，体征与……与我妹妹高度重合。未能执行抵近侦察，我……没敢去。已按原计划撤离。\n\n我到底怎么了？是假装一切为了生存，还是不敢去确认她已经变成了一具尸体。没有了“人”的底线，活着的这堆血肉究竟算什么东西？' },
+
+    { id:'owl_l1_encrypted', companion:'owl', level:1, title:'加密文件夹',
+      text:'《关于如何一键炸掉这个避难所的10种方法》' },
+    { id:'owl_l2_chatfrag', companion:'owl', level:2, title:'聊天记录残片',
+      text:'妈，虽然服务器已经停了，但我每天还是想给你发一句“我过得很好”。' },
+    { id:'owl_l3_will', companion:'owl', level:3, title:'给玩家的遗书',
+      text:'别哭，太占用水分了。我已经写了一段自动代码，死后我会把你的避难所信号伪装成一块废铁，这是我最后的防火墙。' },
+
+    { id:'seed_l1_oath', companion:'seed', level:1, title:'洗得发白的白大褂',
+      text:'口袋里有一张折叠的医生誓词，上面被红笔划掉了一个“救”字。' },
+    { id:'seed_l2_rx', companion:'seed', level:2, title:'处方单背面',
+      text:'第128天，用自己的口粮换了一支退烧药。我是个理智的疯子。' },
+    { id:'seed_l3_will', companion:'seed', level:3, title:'给玩家的遗书',
+      text:'其实我一直怕死。但如果是为了让你多活一秒，这具残破的身体也算完成了最后的临床实验。' },
+
+    { id:'chef_l1_recipe', companion:'chef', level:1, title:'泛黄食谱',
+      text:'全人类消失前，我一定要复刻出妈妈做的那碗面。' },
+    { id:'chef_l2_stocksheet', companion:'chef', level:2, title:'物资盘点表',
+      text:'明明只剩一罐黄桃了，但我骗那个笨蛋玩家说还有一箱。看着大家吃得开心，我居然不觉得饿。' },
+    { id:'chef_l3_will', companion:'chef', level:3, title:'给玩家的遗书',
+      text:'锅里还有最后一份煎蛋，火候刚刚好。别管我，趁热吃。吃饱了，才有力气去见明天的太阳。' }
+  ],
   // Portrait index semantics:
   // comp: 0=机械工程系, 1=科研生物系, 2=医疗行动系
   // scum: 0=暴戾男, 1=操控女, 2=怯懦男
@@ -119,7 +148,6 @@ Object.assign(G, {
     return -1;
   },
   p2BuildNpcCard(evt) {
-    const tags = ['囤货狂','末日前任','神棍邻居','黑市黄牛','情绪炸弹','摆烂哲人','社恐来客','极端求生派'];
     const hooks = [
       '开口先借物资，结尾必反转。',
       '话术离谱，但总能戳中人性弱点。',
@@ -129,13 +157,15 @@ Object.assign(G, {
     const src = evt.id || evt.title || 'npc';
     let hash = 0;
     for (let i = 0; i < src.length; i++) hash = (hash * 31 + src.charCodeAt(i)) >>> 0;
-    const tag = evt.npcTag || tags[hash % tags.length];
+    const tag = evt.npcTag || '';
     const hook = evt.npcHook || hooks[hash % hooks.length];
     const code = String((evt.npcCode ?? (hash % 9999))).padStart(4, '0');
     const avatar = evt.avatar || '🫥';
     const sheet = this.p2ResolvePortraitSheet(evt);
     const portraitIdx = this.p2ResolvePortraitIdx(evt, sheet);
-    const portraitCls = (evt.id === 'influencer_beg')
+    const portraitCls = (evt.id === 'stray_dog')
+      ? 'custom straydog'
+      : (evt.id === 'influencer_beg')
       ? 'custom influencerbeg'
       : (code === '4974')
       ? 'custom wangdaye'
@@ -157,7 +187,7 @@ Object.assign(G, {
       <div class="npc-card">
         <div class="npc-portrait ${portraitCls}">${portraitInner}</div>
         <div class="npc-meta">
-          <div class="npc-row-top"><span class="npc-id">NPC-${code}</span><span class="npc-tag">${tag}</span></div>
+          <div class="npc-row-top"><span class="npc-id">NPC-${code}</span>${tag ? `<span class="npc-tag">${tag}</span>` : ''}</div>
           <div class="npc-name">${evt.title || '匿名幸存者'}</div>
           <div class="npc-hook">${hook}</div>
         </div>
@@ -212,7 +242,7 @@ Object.assign(G, {
     s.p2day = 0; s.exposure = 0; s.hp = 100;
     s.companions = []; s.companionBond = {}; s.chatLog = []; s.starveDays = 0;
     s.bonusEuphPerDay = 0; s.usedEvents = []; s.eventCooldowns = {};
-    s.pendingEvent = null; s.p2app = 'swipe';
+    s.pendingEvent = null; s.p2app = 'swipe'; s.p2ChatFilter = 'all';
     // Carry Phase 1 debt flags into Phase 2 event system
     s.p2Flags = [];
     if (s.flags.heavy_debt) s.p2Flags.push('heavy_debt');
@@ -439,17 +469,19 @@ Object.assign(G, {
       }
     }
 
+    // 3.8 Bond level systemic effects
+    this.p2RunBondLevelEffects();
+
     // 4. Companion chat (bond-aware)
     if (s.companions.length > 0 && Math.random() < 0.35) {
       const cid = s.companions[Math.floor(Math.random()*s.companions.length)];
       const comp = COMPANIONS.find(x => x.id === cid);
       if (comp) {
         const bond = s.companionBond[cid] || 0;
-        let line;
-        if (comp.bondLines && comp.bondLines[bond] && Math.random() < 0.4) {
+        const level = this.p2GetCompanionDisplayLevel(cid);
+        let line = this.p2GetCoreCompanionContextLine(cid) || this.p2GetBondAwareChatLine(comp, level);
+        if (comp.bondLines && comp.bondLines[bond] && Math.random() < 0.25) {
           line = comp.bondLines[bond][Math.floor(Math.random()*comp.bondLines[bond].length)];
-        } else {
-          line = comp.chatLines[Math.floor(Math.random()*comp.chatLines.length)];
         }
         this.p2Chat(comp.icon, comp.name, line);
       }
@@ -577,6 +609,10 @@ Object.assign(G, {
       if (cond.exclude_flags && cond.exclude_flags.some(f => s.p2Flags.includes(f))) return false;
       if (cond.min_exposure !== undefined && s.exposure < cond.min_exposure) return false;
       if (cond.min_food !== undefined && s.foodPool < cond.min_food) return false;
+      if (cond.required_bond) {
+        const needBond = Object.entries(cond.required_bond);
+        if (needBond.some(([cid, lv]) => (s.companionBond[cid] || 0) < lv)) return false;
+      }
 
       return true;
     });
@@ -586,6 +622,7 @@ Object.assign(G, {
     // Step 2: Dynamic weight calculation
     const weighted = candidates.map(e => {
       let w = e.base_weight || 100;
+      const cond = e.conditions || {};
 
       if (s.foodPool <= 8) {
         if (e.type === 'resource' || e.type === 'trap') w *= 1.5;
@@ -599,9 +636,21 @@ Object.assign(G, {
       if (s.companions.length >= 2) {
         if (e.type === 'companion_exclusive' || e.type === 'bond_event') w *= 1.5;
       }
+      // Make companion arcs more noticeable once companions join.
+      if (s.companions.length >= 1) {
+        if (e.type === 'bond_event') w *= 2.8;
+        if (e.type === 'companion_exclusive') w *= 2.3;
+        if (e.requiresCompanion && (s.companionBond[e.requiresCompanion] || 0) < 3) w *= 1.35;
+      }
+      // Personal quest style events should surface quickly after unlock.
+      if (cond.required_bond) {
+        const needBond = Object.entries(cond.required_bond);
+        const exactlyReady = needBond.some(([cid, lv]) => (s.companionBond[cid] || 0) === lv);
+        if (exactlyReady) w *= 2.4;
+      }
       if (e.type === 'bond') w *= 1.3;
       if (e.type === 'companion_exclusive') w *= 1.3;
-      if (e.type === 'drama') w *= 1.2;
+      if (e.type === 'drama') w *= 1.08;
       if (e.type === 'horror' && s.p2day >= 20) w *= 1.2;
       if (s.p2day >= 40 && (e.type === 'threat' || e.type === 'trap')) w *= 1.4;
 
@@ -618,13 +667,242 @@ Object.assign(G, {
     return weighted[weighted.length - 1].event;
   },
 
+  p2GetCompanionFilter(evt) {
+    const s = this.s;
+    const hints = [];
+    let buff = null;
+
+    const pushHint = (cid, text, tone) => {
+      if (!CS.isActive(s, cid)) return;
+      const comp = COMPANIONS.find(c => c.id === cid);
+      if (!comp) return;
+      hints.push({ icon: comp.icon, name: comp.name, text, tone: tone || 'neutral' });
+    };
+
+    if (evt.id === 'neighbor') {
+      pushHint('hunter', '要么给足，要么关门。犹豫只会把你拖死。', 'harsh');
+    }
+
+    if (evt.id === 'ex_colleague') {
+      pushHint('seed', '她在高烧。先救人，再谈风险。', 'support');
+    }
+
+    // 高羁绊黑客干预：诈骗短信事件解锁第三选项
+    if (evt.id === 'sms_scam' && CS.isActive(s, 'owl') && (s.companionBond.owl || 0) >= 3) {
+      buff = {
+        key: 'owl_hackback',
+        label: '【反向黑入】白嫖一笔物资',
+        actor: { icon: '💎', name: '宁鸮' },
+        text: '宁鸮截获了钓鱼后台，反手抽走了对方的物资钱包。你甚至没出门。',
+        exposureReduce: 4,
+        reward: { food: 6, water: 4, med: 1, euph: 18 }
+      };
+      hints.push({ icon: '💎', name: '宁鸮', text: '这条我来处理。给我 20 秒。', tone: 'buff' });
+    }
+
+    return { hints, buff };
+  },
+
+  p2GetCompanionDisplayLevel(cid) {
+    const raw = this.s.companionBond[cid] || 0;
+    return Math.max(1, raw);
+  },
+
+  p2CompanionLeave(cid, reason) {
+    const s = this.s;
+    if (!s.companions.includes(cid)) return;
+    const comp = COMPANIONS.find(x => x.id === cid);
+    s.companions = s.companions.filter(x => x !== cid);
+    delete s.companionDebuffs[cid];
+    delete s.companionBond[cid];
+
+    if (comp && comp.passive) {
+      if (comp.passive.defense) s.defense = Math.max(0, s.defense - comp.passive.defense);
+      if (comp.passive.defBonus) s.defense = Math.max(0, s.defense - comp.passive.defBonus);
+    }
+
+    const who = comp ? `${comp.icon}${comp.name}` : '一名同伴';
+    this.log(`💔 ${who} 离队：${reason}`);
+    this.notif(`${who} 因恐惧离队`,'danger');
+    this.p2Chat('📡','系统', `${who} 离开了避难所。${reason}`, 'sys');
+  },
+
+  p2GetBondAwareChatLine(comp, level) {
+    const commandLines = {
+      hunter: ['收到。守门。', '命令确认。外圈清扫。', '已执行。保持静默。'],
+      owl: ['收到。开始监听。', '命令确认。路由已切换。', '指令执行中。'],
+      seed: ['明白。我去处理。', '收到。按你的方案来。', '已记录，立刻执行。'],
+      chef: ['收到，按计划配给。', '执行中。厨房先稳住。', '明白，优先保温和供餐。'],
+      dog: ['（阿黄立刻起身，守在门边）', '（阿黄低吼一声，执行巡逻）', '（阿黄蹭了蹭你，随后去警戒）']
+    };
+    const trustLines = {
+      hunter: ['我以前在黑市接过同类单子。这个路口通常有暗哨。你怎么看？', '我查到一条旧补给线，想听你判断要不要冒险。'],
+      owl: ['我家旧服务器里挖到一段封存日志。关于这座城的。你要先看吗？', '我在卫星回放里发现一个异常热源，像是隐藏仓。要不要我带你赌一把？'],
+      seed: ['我过去做过一项被叫停的实验……现在也许能救我们。你愿意听完吗？', '我在病历库里找到了一个线索，但风险不低。你拍板，我就做。'],
+      chef: ['我以前给高层做过应急菜单，里面藏着一条物资仓库的旧路径。你想试试吗？', '我知道一间封着的冷库入口，得你决定是否开启。'],
+      dog: ['（阿黄叼来一块写着旧仓库编号的金属牌）', '（阿黄在地上刨出一段旧电缆，像是在提示你什么）']
+    };
+    const loyaltyLines = {
+      hunter: ['你下令，我就执行。错了也一起扛。', '路线有风险？无所谓，我在前面开路。'],
+      owl: ['我不同意你的判断，但我站你这边。链路我来兜底。', '你决策，我兜风险。今天照你的来。'],
+      seed: ['这方案很冒险……但你选了，我就陪你到底。', '就算会输，我也不会让你一个人扛。'],
+      chef: ['再难我也会把后勤撑住。你只管往前走。', '你做决定，我守住厨房和补给，不掉链子。'],
+      dog: ['（阿黄贴着你站定，死活不挪步）', '（阿黄冲你叫了一声，随后挡在你前面）']
+    };
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+    if (level <= 1 && commandLines[comp.id]) return pick(commandLines[comp.id]);
+    if (level === 2 && trustLines[comp.id] && Math.random() < 0.65) return pick(trustLines[comp.id]);
+    if (level >= 3 && loyaltyLines[comp.id] && Math.random() < 0.7) return pick(loyaltyLines[comp.id]);
+    if (comp.chatLines && comp.chatLines.length > 0) return pick(comp.chatLines);
+    return '……';
+  },
+
+  p2RunBondLevelEffects() {
+    const s = this.s;
+    if (!s.companions.length) return;
+
+    const pressureHigh = s.exposure >= 58 || s.hp <= 35 || s.foodPool <= 6 || s.waterPool <= 6;
+    if (pressureHigh) {
+      const lv1List = s.companions.filter(cid => this.p2GetCompanionDisplayLevel(cid) === 1);
+      lv1List.forEach(cid => {
+        if (!s.companions.includes(cid)) return;
+        const leaveChance = 0.05 + (s.exposure >= 75 ? 0.05 : 0);
+        if (Math.random() < leaveChance) {
+          this.p2CompanionLeave(cid, '高压环境触发恐惧反应，选择撤离');
+        }
+      });
+    }
+
+    const lv2plus = s.companions.filter(cid => this.p2GetCompanionDisplayLevel(cid) >= 2 && !s.companionDebuffs[cid]);
+    if (lv2plus.length > 0 && Math.random() < 0.22) {
+      const scoutId = lv2plus[Math.floor(Math.random() * lv2plus.length)];
+      const comp = COMPANIONS.find(c => c.id === scoutId);
+      const found = {
+        food: 1 + Math.floor(Math.random() * 4),
+        water: 1 + Math.floor(Math.random() * 3),
+        med: Math.random() < 0.4 ? 1 : 0
+      };
+      s.foodPool += found.food;
+      s.waterPool += found.water;
+      if (found.med) s.medPool += found.med;
+      this.log(`🔎 ${comp ? comp.name : '同伴'} 发现隐藏补给：食物+${found.food} 水+${found.water}${found.med ? ` 医疗+${found.med}` : ''}`);
+      if (comp) this.p2Chat(comp.icon, comp.name, '在废墟缝隙里翻到暗格了。补给拿回来了。');
+      this.notif('🔎 同伴发现隐藏物资','success');
+    }
+
+    this.p2TryCollectPrivateNote();
+  },
+
+  p2GetResourcePressure() {
+    const s = this.s;
+    const low = s.foodPool <= 8 || s.waterPool <= 8;
+    const rich = s.foodPool >= 28 && s.waterPool >= 24;
+    return { low, rich };
+  },
+
+  p2GetCoreCompanionContextLine(cid) {
+    const p = this.p2GetResourcePressure();
+    if (cid === 'hunter') {
+      if (p.rich) return '防弹插板换好了。今晚你可以睡个好觉，我会睁着一只眼守门。';
+      if (p.low) return '腰带又往里勒了一格。别看我，我吃过树皮，死不了，倒是你别先倒下。';
+    }
+    if (cid === 'owl') {
+      if (p.rich) return '带宽和电力都拉满了。我刚黑进附近监控，要看他们抢方便面的直播吗？';
+      if (p.low) return '脑细胞因为低血糖罢工了。如果我饿死，防火墙会立刻崩。';
+    }
+    if (cid === 'seed') {
+      if (p.rich) return '维C片记得吃。我可不想在物资爆仓的时候，还要处理你的一具坏血病尸体。';
+      if (p.low) return '心率过慢，代谢下降。你要是晕倒，别压到我的手。';
+    }
+    if (cid === 'chef') {
+      if (p.rich) return '和牛A5、松露都在。即便明天末日，今晚胃不能受委屈。';
+      if (p.low) return '罐头汤里兑了三倍的水，这简直是对厨师人格的侮辱。如果你想把我煮了，记得多放点盐。';
+    }
+    return '';
+  },
+
+  p2TriggerSwipeCompanionReaction(dir) {
+    const s = this.s;
+    if (dir === 'left') {
+      if (CS.isActive(s, 'hunter')) {
+        this.p2Chat('🗡️', '楚狄', '善良在末世是慢性毒药。我不认同你这样做。');
+      }
+      if (CS.isActive(s, 'seed')) {
+        this.p2Chat('💉', '黎冥', '救他？治好他要用掉的抗生素，够我们换两箱牛肉。');
+      }
+    }
+    if (dir === 'right' && CS.isActive(s, 'owl')) {
+      this.p2Chat('💎', '宁鸮', '我顺便把他们的求救信号也屏蔽了。');
+    }
+  },
+
+  p2TryCollectPrivateNote() {
+    const s = this.s;
+    if (Math.random() > 0.11) return;
+    const unlocked = new Set(s.privateNotes || []);
+    const candidates = this.P2_PRIVATE_NOTES.filter(note => {
+      if (unlocked.has(note.id)) return false;
+      if (!s.companions.includes(note.companion)) return false;
+      const lv = this.p2GetCompanionDisplayLevel(note.companion);
+      return lv >= note.level;
+    });
+    if (!candidates.length) return;
+
+    const note = candidates[Math.floor(Math.random() * candidates.length)];
+    s.privateNotes.push(note.id);
+    s.noteUnread = (s.noteUnread || 0) + 1;
+    const comp = COMPANIONS.find(c => c.id === note.companion);
+    const skin = this.p2GetNoteSkin(note);
+    this.notif('🗂️ 发现私密碎片（去通讯-碎片档案查看）','success');
+    this.log(`🗂️ 收集：${note.title}`);
+    this.p2Chat('🗂️', '碎片回收', `【${note.title}】${note.text}`, `note:${skin}`);
+    if (comp) this.p2Chat(comp.icon, comp.name, '……这不是给别人看的。算了，你已经看到了。');
+    this.p2RenderAppBar();
+    if (this.s.p2app === 'chat') this.p2RenderModule();
+  },
+
+  p2GetNoteSkin(note) {
+    if (!note || !note.companion) return 'paper';
+    if (note.companion === 'owl') return 'screen';
+    if (note.companion === 'seed') return 'rx';
+    return 'paper';
+  },
+
+  p2ResolveNoteMeta(noteId) {
+    return this.P2_PRIVATE_NOTES.find(n => n.id === noteId);
+  },
+
+  p2GetNoteTitlePrefix(note) {
+    if (!note || !note.companion) return '碎片';
+    if (note.companion === 'hunter') return '战损记录';
+    if (note.companion === 'owl') return '加密残片';
+    if (note.companion === 'seed') return '处方残页';
+    if (note.companion === 'chef') return '后厨手记';
+    return '碎片';
+  },
+
+  p2SetChatFilter(mode) {
+    this.s.p2ChatFilter = mode === 'notes' ? 'notes' : 'all';
+    if (this.s.p2ChatFilter === 'notes') this.s.noteUnread = 0;
+    this.p2RenderAppBar();
+    if (this.s.p2app === 'chat') this.p2RenderModule();
+  },
+
   // ===== SWIPE RESOLUTION =====
   p2Swipe(dir) {
     const s = this.s;
     const evt = s.pendingEvent;
     if (!evt) return;
+    let resultModalText = '';
+    let resultChoiceLabel = '';
 
-    this.p2Chat('🫣','你', dir==='left' ? '← '+evt.left.label : evt.right.label+' →');
+    const filter = this.p2GetCompanionFilter(evt);
+    const buff = filter.buff;
+
+    if (dir === 'left') { resultChoiceLabel = evt.left.label; this.p2Chat('🫣','你', '← ' + evt.left.label); }
+    else if (dir === 'right') { resultChoiceLabel = evt.right.label; this.p2Chat('🫣','你', evt.right.label + ' →'); }
+    else if (dir === 'buff' && buff) { resultChoiceLabel = buff.label; this.p2Chat('🫣','你', '★ ' + buff.label); }
 
     if (dir === 'left') {
       const l = evt.left;
@@ -659,10 +937,12 @@ Object.assign(G, {
           this.notif('⚠️ 上当了！暴露度+' + (l.trapExposure||0),'danger');
         }
         this.p2Chat('⚠️','系统', l.trapText, 'sys');
+        resultModalText = l.trapText || '你触发了陷阱。';
       } else {
         // Safe / success
         const lText = typeof l.text === 'function' ? l.text() : l.text;
         this.log(`✓ ${l.safeText || lText}`);
+        resultModalText = (l.safeText || lText || '').trim();
 
         // Random outcomes
         if (l.randomOutcomes) {
@@ -674,6 +954,7 @@ Object.assign(G, {
               this.notif(o.text,'success');
               if (o.reward) this.p2ApplyReward(o.reward);
               this.p2Chat('📦','系统', o.text);
+              resultModalText = (resultModalText ? (resultModalText + '\n\n' + o.text) : o.text);
               break;
             }
           }
@@ -726,6 +1007,20 @@ Object.assign(G, {
           s.waterPool = Math.max(0, s.waterPool - (l.cost_after.water||0));
         }
       }
+    } else if (dir === 'buff') {
+      if (!buff) {
+        SFX.play('error');
+        this.notif('❌ 当前事件无可用干预选项','danger');
+        return;
+      }
+      SFX.play('upgrade');
+      if (buff.exposureReduce) s.exposure = Math.max(0, s.exposure - buff.exposureReduce);
+      if (buff.reward) this.p2ApplyReward(buff.reward);
+      if (buff.add_flags) buff.add_flags.forEach(f => { if (!s.p2Flags.includes(f)) s.p2Flags.push(f); });
+      this.log(`★ ${buff.text}`);
+      this.p2Chat(buff.actor.icon, buff.actor.name, buff.text);
+      this.notif(`${buff.actor.name} 干预成功`,'success');
+      resultModalText = (buff.text || '').trim();
     } else {
       // Right swipe — use CS helpers
       SFX.play('cash');
@@ -744,15 +1039,72 @@ Object.assign(G, {
       // Special effects for right swipe
       if (r.special) this.p2HandleSpecial(r.special);
       if (r.add_flags) r.add_flags.forEach(f => { if (!s.p2Flags.includes(f)) s.p2Flags.push(f); });
+
+      const hasLoyalFollower = s.companions.some(cid => this.p2GetCompanionDisplayLevel(cid) >= 3 && !s.companionDebuffs[cid]);
+      if (hasLoyalFollower && ((r.exposure || 0) >= 5 || (r.euph || 0) < 0 || r.penalty)) {
+        const loyalId = s.companions.find(cid => this.p2GetCompanionDisplayLevel(cid) >= 3 && !s.companionDebuffs[cid]);
+        const loyalComp = COMPANIONS.find(c => c.id === loyalId);
+        s.exposure = Math.max(0, s.exposure - 3);
+        this.log(`🤝 生死之交兜底：${loyalComp ? loyalComp.name : '同伴'} 为你的决策擦尾，暴露度-3`);
+        if (loyalComp) this.p2Chat(loyalComp.icon, loyalComp.name, '这步很险，但我跟你。后果我来一起扛。');
+      }
+
       this.log(`→ ${r.text}`);
       this.p2Chat('📡','系统', r.text);
+      resultModalText = (r.text || '').trim();
+
+      // 事件滤镜：老兵在关键拒绝事件上给出即时反馈并追加爽度
+      if (evt.id === 'neighbor' && CS.isActive(s, 'hunter')) {
+        const line = '干得漂亮，仁慈是末世的自杀慢性药。';
+        const bonus = 12;
+        s.euphCurrency += bonus;
+        this.p2Chat('🗡️', '楚狄', line);
+        this.log(`🗡️ 月狩点评：${line}（爽度+${bonus}）`);
+        this.notif(`🗡️ 月狩点评触发：爽度+${bonus}`,'success');
+        resultModalText = `${resultModalText}\n\n🗡️ 楚狄：${line}（爽度+${bonus}）`.trim();
+      }
     }
+
+    this.p2TriggerSwipeCompanionReaction(dir);
 
     s.pendingEvent = null;
     // Tutorial step 3: after first swipe
     if (s.p2TutStep === 2) { this.render(); setTimeout(() => this.p2Tutorial(3), 600); return; }
-    this.resumeGame();
     this.render();
+    if (resultModalText) this.p2ShowResultToast(evt.title || '事件结果', resultChoiceLabel, resultModalText);
+    this.resumeGame();
+  },
+
+  p2ShowResultToast(title, choiceLabel, text) {
+    let el = document.getElementById('p2ResultToast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'p2ResultToast';
+      el.className = 'p2-result-toast';
+      document.body.appendChild(el);
+    }
+    const safeTitle = title || '事件结果';
+    const choice = choiceLabel ? `<div class="rt-choice">你的选择：<span class="rt-choice-val">${choiceLabel}</span></div>` : '';
+    const body = (text || '').replace(/\n/g, '<br>');
+    el.innerHTML = `<div class="rt-title">${safeTitle}</div>${choice}<div class="rt-body">${body}</div>`;
+    el.classList.remove('show');
+    // force reflow to restart animation
+    void el.offsetWidth;
+    el.classList.add('show');
+    if (!this._p2ToastScreenDismissHandler) {
+      this._p2ToastScreenDismissHandler = () => {
+        const cur = document.getElementById('p2ResultToast');
+        if (!cur || !cur.classList.contains('show')) return;
+        clearTimeout(this._p2ResultToastTimer);
+        cur.classList.remove('show');
+      };
+      document.addEventListener('pointerdown', this._p2ToastScreenDismissHandler, true);
+    }
+    clearTimeout(this._p2ResultToastTimer);
+    this._p2ResultToastTimer = setTimeout(() => {
+      const cur = document.getElementById('p2ResultToast');
+      if (cur) cur.classList.remove('show');
+    }, 2000);
   },
 
   p2ApplyReward(rw) {
@@ -991,8 +1343,11 @@ Object.assign(G, {
     const s = this.s;
     const apps = [{id:'swipe',name:'事件',icon:'📋'},{id:'chat',name:'通讯',icon:'💬'},{id:'companion',name:'同伴',icon:'👥'},{id:'market',name:'黑市',icon:'🏪'}];
     document.getElementById('appBar').innerHTML = apps.map(a =>
-      `<button class="app-btn ${s.p2app===a.id?'active':''}" onclick="G.p2SwitchApp('${a.id}')">
-        <div class="icon">${a.icon}</div><div class="name">${a.name}</div></button>`
+      {
+        const noteBadge = (a.id === 'chat' && (s.noteUnread || 0) > 0) ? `<span style="color:#ff453a;font-size:10px;margin-left:3px">+${s.noteUnread}</span>` : '';
+        return `<button class="app-btn ${s.p2app===a.id?'active':''}" onclick="G.p2SwitchApp('${a.id}')">
+        <div class="icon">${a.icon}</div><div class="name">${a.name}${noteBadge}</div></button>`;
+      }
     ).join('');
   },
 
@@ -1023,25 +1378,34 @@ Object.assign(G, {
       return;
     }
     const evt = s.pendingEvent;
+    const filter = this.p2GetCompanionFilter(evt);
     const icons = {food:'🍚',water:'💧',med:'💊'};
     const costStr = Object.entries(evt.left.cost||{}).map(([k,v])=>
       `<span>${icons[k]||k} -${v}</span>`).join('') || '<span>免费</span>';
     const evtDesc = typeof evt.desc === 'function' ? evt.desc() : evt.desc;
+    const filterHintsHtml = filter.hints.map(h =>
+      `<div class="filter-item ${h.tone || 'neutral'}"><span class="who">${h.icon} ${h.name}</span><span class="line">${h.text}</span></div>`
+    ).join('');
+    const buffBtn = filter.buff
+      ? `<button class="swipe-btn buff" onclick="G.p2Swipe('buff')">★ ${filter.buff.label}</button>`
+      : '';
 
     panel.style.display='flex';panel.style.flexDirection='column';
     panel.innerHTML = `
       <div class="swipe-area" id="swipeArea">
-        <div class="swipe-card" id="swipeCard">
+        <div class="swipe-card ${filter.buff ? 'card-buffed' : ''}" id="swipeCard">
           <span class="swipe-label lbl-left">接纳</span>
           <span class="swipe-label lbl-right">拒绝</span>
           ${this.p2BuildNpcCard(evt)}
           ${this.p2BuildArcProgress(evt)}
+          ${filterHintsHtml ? `<div class="companion-filter">${filterHintsHtml}</div>` : ''}
           <div class="card-desc">${evtDesc}</div>
           <div class="card-costs">${costStr}</div>
         </div>
       </div>
       <div class="swipe-btns">
         <button class="swipe-btn accept" onclick="G.p2Swipe('left')">← ${evt.left.label}</button>
+        ${buffBtn}
         <button class="swipe-btn reject" onclick="G.p2Swipe('right')">${evt.right.label} →</button>
       </div>`;
     setTimeout(() => this.p2InitSwipeTouch(), 50);
@@ -1101,13 +1465,49 @@ Object.assign(G, {
   },
 
   p2RenderChat(panel) {
-    let html = '<div class="m-header"><span>💬 加密通讯录</span><span style="color:#555;font-size:10px">群聊</span></div><div class="chat-wrap">';
-    this.s.chatLog.forEach(m => {
-      html += `<div class="chat-msg ${m.type==='sys'?'sys':''}">
+    const s = this.s;
+    const filter = s.p2ChatFilter || 'all';
+    const allCls = filter === 'all' ? 'on' : '';
+    const notesCls = filter === 'notes' ? 'on' : '';
+    const notesBadge = (s.noteUnread || 0) > 0 ? ` <span style="color:#ff453a">(${s.noteUnread})</span>` : '';
+
+    let html = `<div class="m-header"><span>💬 加密通讯录</span>
+      <div class="chat-tools">
+        <button class="chat-filter ${allCls}" onclick="G.p2SetChatFilter('all')">全部</button>
+        <button class="chat-filter ${notesCls}" onclick="G.p2SetChatFilter('notes')">碎片档案${notesBadge}</button>
+      </div></div>`;
+
+    if (filter === 'notes') {
+      const notes = (s.privateNotes || []).map(id => this.p2ResolveNoteMeta(id)).filter(Boolean);
+      html += '<div class="note-archive">';
+      notes.slice().reverse().forEach(n => {
+        const skin = this.p2GetNoteSkin(n);
+        const lv = `Lv.${n.level}`;
+        const owner = COMPANIONS.find(c => c.id === n.companion);
+        const prefix = this.p2GetNoteTitlePrefix(n);
+        html += `<div class="note-card ${skin}">
+          <div class="note-top"><span>【${prefix}】${n.title}</span><span>${lv}</span></div>
+          <div class="note-body">${n.text}</div>
+          <div class="note-owner">${owner ? owner.icon + ' ' + owner.name : '未知来源'}</div>
+        </div>`;
+      });
+      if (notes.length === 0) html += '<div style="text-align:center;color:#444;padding:20px">暂无碎片</div>';
+      html += '</div>';
+      panel.innerHTML = html;
+      panel.scrollTop = 0;
+      return;
+    }
+
+    html += '<div class="chat-wrap">';
+    s.chatLog.forEach(m => {
+      const isSys = m.type === 'sys';
+      const noteSkin = (m.type && m.type.startsWith('note:')) ? m.type.split(':')[1] : '';
+      const cls = `${isSys ? 'sys' : ''} ${noteSkin ? `note ${noteSkin}` : ''}`.trim();
+      html += `<div class="chat-msg ${cls}">
         <div class="c-avatar">${m.icon}</div>
         <div class="c-bubble"><div class="c-name">${m.name} · 第${m.day}天</div><div class="c-text">${m.text}</div></div></div>`;
     });
-    if (this.s.chatLog.length===0) html += '<div style="text-align:center;color:#444;padding:20px">暂无消息</div>';
+    if (s.chatLog.length===0) html += '<div style="text-align:center;color:#444;padding:20px">暂无消息</div>';
     html += '</div>';
     panel.innerHTML = html;
     panel.scrollTop = panel.scrollHeight;
@@ -1123,7 +1523,8 @@ Object.assign(G, {
       const c = COMPANIONS.find(x=>x.id===cid);
       if (!c) return;
       const bond = s.companionBond[cid] || 0;
-      const bondNames = ['陌生','信任','羁绊','共生'];
+      const level = this.p2GetCompanionDisplayLevel(cid);
+      const bondNames = ['预备','初识','信任','生死之交'];
       const bondColors = ['#666','#0a84ff','#bf5af2','#ff2d55'];
       const eff = [];
       if (c.passive.defense) eff.push(`防御+${c.passive.defense}`);
@@ -1142,8 +1543,8 @@ Object.assign(G, {
 
       const isSSR = c.rarity === 'SSR';
       const codeStr = c.code ? `「${c.code}」` : '';
-      const bondBar = isSSR ? `<div class="bond-wrap"><div class="bond-label" style="color:${bondColors[bond]}">♥ ${bondNames[bond]} Lv${bond}</div><div class="bond-bar"><div class="bond-fill" style="width:${bond*33.3}%;background:${bondColors[bond]}"></div></div></div>` : '';
-      const hookStr = c.hook && bond >= 1 ? `<div class="comp-hook">${c.hook}</div>` : '';
+      const bondBar = isSSR ? `<div class="bond-wrap"><div class="bond-label" style="color:${bondColors[bond]}">♥ ${bondNames[bond]} Lv${level}</div><div class="bond-bar"><div class="bond-fill" style="width:${bond*33.3}%;background:${bondColors[bond]}"></div></div></div>` : '';
+      const hookStr = c.hook && level >= 2 ? `<div class="comp-hook">${c.hook}</div>` : '';
 
       html += `<div class="comp-card ${isSSR?'ssr':''}"><div class="comp-av">${c.icon}</div>
         <div class="comp-info">
