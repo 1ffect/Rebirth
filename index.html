@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>末日重生模拟器 v2.2</title>
+<title>末日重生模拟器 v2.3</title>
 <script>
 (function () {
   if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
@@ -33,7 +33,7 @@
 })();
 </script>
 <!-- 不引用 Google Fonts：境内/部分移动网络会长时间阻塞或失败，导致白屏 -->
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 
@@ -63,7 +63,7 @@
     </div>
   </div>
   <button id="intro-start-btn" onclick="G.startGame()">接受指引，激活借贷·套现 / 商城 App</button>
-  <button id="intro-resume-btn" onclick="G.resumeFromSave()" style="margin-top:10px;padding:12px 30px;background:#000;border:1px solid #32d74b;color:#32d74b;font-family:'JetBrains Mono',inherit;font-weight:700;font-size:13px;border-radius:0;cursor:pointer;letter-spacing:2px;display:none">继续上次游戏</button>
+  <button id="intro-resume-btn" onclick="G.resumeFromSave()">继续上次游戏</button>
 </div>
 <div class="glitch-overlay" id="glitchOverlay"></div>
 
@@ -122,15 +122,15 @@
 <div class="ending-overlay" id="endingOverlay" style="background:linear-gradient(180deg,#000,#001a0a)"><div class="ending-box" id="endingBox"></div></div>
 <div class="crt-overlay" id="crtOverlay"></div>
 
-<script src="js/sfx.js?v=9"></script>
-<script src="js/meta.js?v=7"></script>
-<script src="js/warehouse.js?v=7"></script>
-<script src="js/companions.js?v=7"></script>
-<script src="js/data.js?v=7"></script>
-<script src="js/events-p2.js?v=7"></script>
-<script src="js/engine-core.js?v=7"></script>
-<script src="js/engine-p2.js?v=7"></script>
-<script src="js/engine-endings.js?v=7"></script>
+<script src="js/sfx.js?v=10"></script>
+<script src="js/meta.js?v=8"></script>
+<script src="js/warehouse.js?v=8"></script>
+<script src="js/companions.js?v=8"></script>
+<script src="js/data.js?v=8"></script>
+<script src="js/events-p2.js?v=8"></script>
+<script src="js/engine-core.js?v=8"></script>
+<script src="js/engine-p2.js?v=8"></script>
+<script src="js/engine-endings.js?v=8"></script>
 <script>window.addEventListener('DOMContentLoaded', () => G.init());</script>
 </body>
 </html>
