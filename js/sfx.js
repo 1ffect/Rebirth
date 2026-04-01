@@ -7,20 +7,47 @@ const SFX = {
   _bgm: null,
   sfxMul: 0.45,
   bgmVol: 0.35,
+  _bgmWantPlay: false,
+  _bgmRetryBound: false,
   init() { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
   ensure() { if (!this.ctx) this.init(); if (this.ctx.state === 'suspended') this.ctx.resume(); },
+  _bindBgmRetry() {
+    if (this._bgmRetryBound) return;
+    this._bgmRetryBound = true;
+    const go = () => {
+      document.removeEventListener('pointerdown', go, true);
+      document.removeEventListener('keydown', go, true);
+      this._bgmRetryBound = false;
+      this._playBgmOnce();
+    };
+    document.addEventListener('pointerdown', go, true);
+    document.addEventListener('keydown', go, true);
+  },
+  _playBgmOnce() {
+    if (!this._bgm || !this._bgmWantPlay) return;
+    this._bgm.volume = this.bgmVol;
+    const p = this._bgm.play();
+    if (p && typeof p.catch === 'function') {
+      p.catch(() => this._bindBgmRetry());
+    }
+  },
   startBgm() {
+    this._bgmWantPlay = true;
     if (!this._bgm) {
-      const a = new Audio('assets/bgm-main.mp3');
+      const bgmSrc = (typeof window.__GAME_BASE__ === 'string' && window.__GAME_BASE__)
+        ? new URL('assets/bgm-main.mp3', window.__GAME_BASE__).href
+        : 'assets/bgm-main.mp3';
+      const a = new Audio(bgmSrc);
       a.loop = true;
       a.preload = 'auto';
       this._bgm = a;
+      a.addEventListener('canplay', () => this._playBgmOnce(), { once: true });
+      a.load();
     }
-    this._bgm.volume = this.bgmVol;
-    const p = this._bgm.play();
-    if (p && typeof p.catch === 'function') p.catch(() => {});
+    this._playBgmOnce();
   },
   stopBgm() {
+    this._bgmWantPlay = false;
     if (!this._bgm) return;
     this._bgm.pause();
     this._bgm.currentTime = 0;

@@ -145,7 +145,7 @@ const G = {
     setTimeout(() => {
       const btn = document.querySelector('.app-btn[data-app="shop"]');
       if (btn) btn.classList.add('tutorial-highlight');
-      this.showTip('去商城扫货！注意空间限制 🛒');
+      this.showTip('去商城购物！注意空间限制 🛒');
     }, 400);
   },
   tutorialStep3() {
@@ -164,7 +164,7 @@ const G = {
     this.s.tutorialStep = 4;
     document.querySelectorAll('.tutorial-highlight').forEach(e => e.classList.remove('tutorial-highlight'));
     this.removeTip();
-    setTimeout(() => this.notif('💡 循环：搞钱→升级→扫货→再搞钱！', 'money'), 300);
+    setTimeout(() => this.notif('💡 循环：借贷套现→升级→购物→再加杠杆！', 'money'), 300);
   },
   showTip(t) { this.removeTip(); const e=document.createElement('div'); e.className='tutorial-tip'; e.id='tutTip'; e.textContent=t; document.body.appendChild(e); },
   removeTip() { const e=document.getElementById('tutTip'); if(e)e.remove(); },
@@ -438,7 +438,7 @@ const G = {
           <div style="color:#aaa;font-size:13px;line-height:1.6">房产、车子、期权——一键变现 5000万~1.5亿。<br>末日后钱就是废纸，全梭哈！</div>
         </div>
         <div class="modal-options">
-          <button class="option-btn" onclick="G.closeModal();G.switchApp('finance')" style="text-align:center;font-weight:700;color:#CCFF00">去搞钱页面查看 → <span id="unlockCountdown" style="color:#555">(4s)</span></button>
+          <button class="option-btn" onclick="G.closeModal();G.switchApp('finance')" style="text-align:center;font-weight:700;color:#CCFF00">去借贷·套现页查看 → <span id="unlockCountdown" style="color:#555">(4s)</span></button>
         </div>`;
       document.getElementById('modalOverlay').classList.add('show');
       // Auto-close countdown
@@ -543,8 +543,8 @@ const G = {
     const panel = document.getElementById('modulePanel'), s = this.s;
 
     if (s.app === 'finance') {
-      // 极简3按钮搞钱
-      let html = `<div class="m-header"><span>💰 搞钱</span><span style="color:#888;font-size:10px">没钱了？点亮着的按钮</span></div><div class="fin-btns">`;
+      // 极简多按钮：刷卡 / 网贷 / 抵押 / 黑市 / 梭哈
+      let html = `<div class="m-header"><span>💰 借贷 · 套现 · 梭哈</span><span style="color:#888;font-size:10px">能亮就点，先把现金套出来</span></div><div class="fin-btns">`;
       this.FINANCE_BTNS.forEach(btn => {
         const count = s.finCount[btn.id] || 0;
         const maxed = count >= btn.maxUses;
@@ -733,7 +733,7 @@ const G = {
     const item = this.ITEMS.find(x => x.id === itemId);
     if (!item) return;
     const cost = Math.floor(item.price * this.priceMul(item.price));
-    if (s.cash < cost) { SFX.play('error'); this.notif('❌ 现金不足！去搞钱','danger'); return; }
+    if (s.cash < cost) { SFX.play('error'); this.notif('❌ 现金不足！去借贷·套现','danger'); return; }
     if (s.used + item.vol > s.capacity) {
       SFX.play('error'); this.notif('❌ 空间满了！去基建App升级','danger');
       if (this.s.tutorialStep <= 3) this.tutorialStep3();

@@ -469,7 +469,7 @@ const P2_EVENTS = [
       right:{ label:'播放当天监控录像', euph:20, exposure:15,
         text:'录像显示王大爷是自己选择离开的。大汉看完，一言不发地走了。\n\n但你知道——他会记住这个地方。' } },
 
-    // 七、债务后果事件（Phase 1 搞钱→Phase 2 催收）
+    // 七、债务后果事件（Phase 1 借贷套现→Phase 2 催收）
     { id:'debt_collector', day:[5,25], type:'threat', once:true, base_weight:180,
       conditions:{ required_flags:['heavy_debt'] },
       title:'网贷催收上门', avatar:'📱',

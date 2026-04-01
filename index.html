@@ -4,9 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>末日重生模拟器 v2.1</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=6">
+<script>
+(function () {
+  if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+  var path = location.pathname;
+  if (path.length > 1 && !path.endsWith('/')) {
+    var last = path.slice(path.lastIndexOf('/') + 1);
+    if (last.indexOf('.') === -1) {
+      location.replace(location.origin + path + '/' + location.search + location.hash);
+      return;
+    }
+  }
+  var dir = path;
+  if (!dir.endsWith('/')) dir = dir.replace(/[^/]+$/, '');
+  if (!dir.endsWith('/')) dir += '/';
+  window.__GAME_BASE__ = location.origin + dir;
+})();
+</script>
+<!-- 不引用 Google Fonts：境内/部分移动网络会长时间阻塞或失败，导致白屏 -->
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 
@@ -35,7 +51,7 @@
       <div class="sys-punchline">只有装进避难所里的，才是属于你的。<br><span style="font-size:11px;opacity:0.7">祝您重生愉快。</span></div>
     </div>
   </div>
-  <button id="intro-start-btn" onclick="G.startGame()">接受指引，激活搞钱/商城 App</button>
+  <button id="intro-start-btn" onclick="G.startGame()">接受指引，激活借贷·套现 / 商城 App</button>
   <button id="intro-resume-btn" onclick="G.resumeFromSave()" style="margin-top:10px;padding:12px 30px;background:#000;border:1px solid #32d74b;color:#32d74b;font-family:'JetBrains Mono',inherit;font-weight:700;font-size:13px;border-radius:0;cursor:pointer;letter-spacing:2px;display:none">继续上次游戏</button>
 </div>
 <div class="glitch-overlay" id="glitchOverlay"></div>
@@ -95,7 +111,7 @@
 <div class="ending-overlay" id="endingOverlay" style="background:linear-gradient(180deg,#000,#001a0a)"><div class="ending-box" id="endingBox"></div></div>
 <div class="crt-overlay" id="crtOverlay"></div>
 
-<script src="js/sfx.js?v=6"></script>
+<script src="js/sfx.js?v=8"></script>
 <script src="js/meta.js?v=6"></script>
 <script src="js/warehouse.js?v=6"></script>
 <script src="js/companions.js?v=6"></script>

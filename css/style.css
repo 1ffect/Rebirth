@@ -1,7 +1,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;height:100dvh;overflow:hidden;background:#000;-webkit-user-select:none;user-select:none}
-body{font-family:'Noto Sans SC',-apple-system,'PingFang SC',sans-serif;color:#e0e0e0;touch-action:manipulation}
-.mono{font-family:'JetBrains Mono','Orbitron',monospace;letter-spacing:0.5px}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',sans-serif;color:#e0e0e0;touch-action:manipulation}
+.mono{font-family:ui-monospace,SFMono-Regular,'JetBrains Mono','Menlo','Consolas',monospace;letter-spacing:0.5px}
 
 /* ===== CINEMATIC INTRO ===== */
 #intro-overlay{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px;transition:opacity 0.8s}

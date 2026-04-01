@@ -3,7 +3,7 @@
 // ========================================
 
 const APPS = [
-  { id:'finance', name:'搞钱', icon:'💰' },
+  { id:'finance', name:'借贷·套现', icon:'💰' },
   { id:'shop',    name:'商城', icon:'🛒' },
   { id:'base',    name:'基建', icon:'🏗️' }
 ];
@@ -58,7 +58,7 @@ const INTEL = [
   { day:-28, type:'tip',      tag:'内部消息', head:'狂点信用卡！', detail:'每次+5万，点5次解锁【极速网贷】500万秒到！先把避难所升级——大米太占地方了！' },
   { day:-20, type:'breaking', tag:'重大事件', head:'全球恐慌：物价加速飙升', detail:'网贷花完别慌——花光后【一键抵押全部家当】就会亮起！一键变现5000万起！' },
   { day:-10, type:'breaking', tag:'最终手段', head:'【一键抵押】已解锁！', detail:'房产车子期权全部变现！5000万~1.5亿一键到账。末日后钱就是废纸——全梭哈！升Lv3乌托邦！' },
-  { day:-5,  type:'tip',      tag:'倒计时',   head:'最后5天！终极扫货', detail:'食物/水/发电/防御/和牛/影院——有钱全砸进避难所！倒计时结束后钱=废纸！' },
+  { day:-5,  type:'tip',      tag:'倒计时',   head:'最后5天！快去商城买齐', detail:'食物/水/发电/防御/和牛/影院——有钱全砸进避难所！倒计时结束后钱=废纸！' },
 ];
 
 const EVENTS = [
@@ -108,12 +108,12 @@ const EVENTS = [
 
 const META_ITEMS = [
   { id:'loanshark',  name:'高利贷小广告',   icon:'💸', cost:200,  desc:'开局直接多100万启动资金！' },
-  { id:'darkloan',   name:'黑市借贷APP',    icon:'🏴', cost:300,  desc:'解锁新搞钱按钮：500万额度×2次，但末日后每天多耗1食物' },
+  { id:'darkloan',   name:'黑市借贷APP',    icon:'🏴', cost:300,  desc:'解锁新借贷按钮：500万额度×2次，但末日后每天多耗1食物' },
   { id:'vipcard',    name:'VIP仓储会员卡',  icon:'🏷️', cost:350,  desc:'商城所有物价永久打8折' },
   { id:'blueprint',  name:'地下扩容图纸',   icon:'📐', cost:400,  desc:'开局直升Lv1人防工程(500m³)，省下20万升级费' },
   { id:'medreserve', name:'应急医疗储备',   icon:'💉', cost:500,  desc:'末日降临时额外获得10单位医疗物资' },
   { id:'expack',     name:'前任来访卡包',   icon:'💔', cost:500,  desc:'解锁极品前任连环事件链，拒绝可获爆量爽度！' },
-  { id:'crypto',     name:'加密货币终端',   icon:'₿',  cost:600,  desc:'解锁搞钱新按钮：投入全部现金，50%翻倍 / 50%清零！' },
+  { id:'crypto',     name:'加密货币终端',   icon:'₿',  cost:600,  desc:'解锁梭哈按钮：投入全部现金，50%翻倍 / 50%清零！' },
   { id:'nuclear',    name:'微型核聚变电池', icon:'☢️', cost:800,  desc:'发电机不再消耗食物作为燃料' },
   { id:'helicopter', name:'直升机救援线索', icon:'🚁', cost:1500, desc:'解锁隐藏结局：存活45天+防御≥80→直升机来接你！' },
   { id:'dungeon',    name:'地下城蓝图碎片', icon:'🏚️', cost:1200, desc:'解锁隐藏结局：存活50天+2位SSR同伴→发现地下城入口！' },
